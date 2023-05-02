@@ -40,7 +40,7 @@
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <transformers>
                 <transformer>
-                  <mainClass>com.github.polyrocketmatt.flowfuscate.FlowFuscate</mainClass>
+                  <mainClass>com.github.polyrocketmatt.reflow.ReFlow</mainClass>
                 </transformer>
               </transformers>
             </configuration>
@@ -54,7 +54,7 @@
             <manifest>
               <addClasspath>true</addClasspath>
               <classpathPrefix>libs/</classpathPrefix>
-              <mainClass>com.github.polyrocketmatt.flowfuscate.Flowfuscate</mainClass>
+              <mainClass>com.github.polyrocketmatt.reflow.Flowfuscate</mainClass>
             </manifest>
           </archive>
         </configuration>

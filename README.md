@@ -7,10 +7,10 @@
     <img width="128" height="128" src="img/flow_dark.png" />
 </p>
 
-<h1 align="center">FlowFuscate</h1>
+<h1 align="center">ReFlow</h1>
 
-FlowFuscate is a powerful and easy-to-use Java obfuscator. It is primarily developed for personal
-reasons and is an open-source project (GPL v3 License). Currently, FlowFuscate supports the following
+ReFlow is a powerful and easy-to-use Java bytecode tool and obfuscator. It is primarily developed for personal
+reasons and is an open-source project (GPL v3 License). Currently, ReFlow supports the following
 types of obfuscation:
 
--   [x] Nothing :)
+-   [x] A (primitive) decompiler with basic syntax highlighting.
