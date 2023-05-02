@@ -60,22 +60,6 @@ public class FlowActions {
 
             //  Extract classes from JAR and store in temp directory
             JarExtractor.extractClasses(currentFile, TEMP_DIR, currentClassHandler.getClasses().keySet());
-
-            /*
-            //  Add the JTree to the explorer tab
-            JScrollPane treePane = constructClassTree(selectedFile.getName(), handler.getClasses().keySet());
-
-            //  Get class explorer pane
-            JPanel explorerPanel = explorerPanels.get(0);
-
-            treePane.setPreferredSize(new Dimension(400, splitPane.getDividerLocation() - 50));
-            explorerPanel.add(treePane, BorderLayout.WEST);
-
-            //  Decompiled View
-            decompiledTabs.getTabbedPane().setPreferredSize(new Dimension(explorerPanel.getWidth() - 430, splitPane.getDividerLocation() - 50));
-            explorerPanel.add(decompiledTabs.getTabbedPane(), BorderLayout.EAST);
-
-             */
         } catch (Exception ex) {
             ex.printStackTrace();
         }
