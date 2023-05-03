@@ -137,6 +137,11 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         return textPane;
     }
 
+    @Override
+    public void setVisibile(boolean visibility) {
+        textPane.setVisible(visibility);
+    }
+
     private void insert(StyledDocument document, int length, String part, Style style) {
         try { document.insertString(length, part, style); }
         catch (BadLocationException exception) { exception.printStackTrace(); }

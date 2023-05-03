@@ -50,6 +50,15 @@ public class FlowEditor implements FlowComponent {
         return panel;
     }
 
+    @Override
+    public void setVisibile(boolean visibility) {
+        pipelinePanel.setVisible(visibility);
+        logPanel.setVisible(visibility);
+        panel.setVisible(visibility);
+        pipeline.setVisibile(visibility);
+        log.setVisibile(visibility);
+    }
+
     public JPanel getPipelinePanel() {
         return pipelinePanel;
     }

@@ -41,6 +41,12 @@ public class FlowTabbedPanel implements FlowComponent {
         return pane;
     }
 
+    @Override
+    public void setVisibile(boolean visibility) {
+        tabs.forEach(tab -> tab.setVisibile(visibility));
+        pane.setVisible(visibility);
+    }
+
     public List<FlowTab> getTabs() {
         return tabs;
     }

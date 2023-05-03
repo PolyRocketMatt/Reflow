@@ -61,7 +61,8 @@ public class FlowInterface extends JFrame {
         //  Menu Items
         fileMenu.add(new FlowMenuItem("Open").withListener(event -> {
             actions.openFileAction(event);
-            initEditorPanel();
+
+            updateEditorPanel();
         }));
         fileMenu.add(new FlowMenuItem("Exit").withListener(actions::exitAction));
 
@@ -121,6 +122,25 @@ public class FlowInterface extends JFrame {
         actions.initializeClassTree();
 
         //  Create the flow editor
+        createFlowEditor();
+    }
+
+    private void updateEditorPanel() {
+        //  Initialize the class tree
+        actions.initializeClassTree();
+
+        //  Unregister the old editor
+        if (get(FlowEditor.class) != null)
+            unregister(FlowEditor.class);
+
+        //  Create the flow editor
+        createFlowEditor();
+        revalidate();
+        repaint();
+    }
+
+    private void createFlowEditor() {
+        //  Create the flow editor
         FlowEditor flowEditor = new FlowEditor(getNextIndex(), getWidth(), getHeight());
         FlowTab inputTab = flowEditor.getPipeline().getTabByIndex(0);
         FlowClassExplorer explorer = new FlowClassExplorer(actions.getCurrentFile().getName(), actions.getCurrentClassHandler().getClasses().keySet());
@@ -129,7 +149,7 @@ public class FlowInterface extends JFrame {
         inputTab.getComponent().add(explorer.getComponent());
 
         register(flowEditor);
-        setVisibility(flowEditor);
+        setVisibility(flowEditor.getIndex());
     }
 
     public void register(FlowComponent component) {
@@ -138,7 +158,20 @@ public class FlowInterface extends JFrame {
         add(component.getComponent());
     }
 
+    private void unregister(Class<?> clazz) {
+        FlowComponent component = get(clazz);
+
+        component.setVisibile(false);
+        panels.removeIf(panel -> panel.getClass().equals(clazz));
+    }
+
+    private FlowComponent get(Class<?> clazz) {
+        return panels.stream().filter(panel -> panel.getClass().equals(clazz)).findFirst().orElse(null);
+    }
+
     public void setVisibility(int index) {
+        System.out.println("Setting visibility to " + index);
+
         if (index < 0 || index >= panels.size())
             throw new IllegalArgumentException("Index out of bounds");
         panels.forEach(panel -> panel.getComponent().setVisible(panel.getIndex() == index));

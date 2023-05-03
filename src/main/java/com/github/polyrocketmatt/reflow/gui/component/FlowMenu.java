@@ -18,4 +18,9 @@ public class FlowMenu implements FlowComponent {
     public JMenu getComponent() {
         return menu;
     }
+
+    @Override
+    public void setVisibile(boolean visibility) {
+
+    }
 }

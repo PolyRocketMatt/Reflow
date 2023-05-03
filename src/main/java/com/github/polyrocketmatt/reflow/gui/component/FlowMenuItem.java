@@ -31,4 +31,9 @@ public class FlowMenuItem implements FlowComponent {
     public JMenuItem getComponent() {
         return item;
     }
+
+    @Override
+    public void setVisibile(boolean visibility) {
+
+    }
 }

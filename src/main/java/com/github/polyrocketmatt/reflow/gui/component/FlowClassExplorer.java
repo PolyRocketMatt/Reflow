@@ -40,6 +40,13 @@ public class FlowClassExplorer implements FlowComponent {
         return parentPanel;
     }
 
+    @Override
+    public void setVisibile(boolean visibility) {
+        classTree.setVisible(visibility);
+        decompiledTabs.setVisibile(visibility);
+        parentPanel.setVisible(visibility);
+    }
+
     public JScrollPane getClassTree() {
         return classTree;
     }

@@ -10,4 +10,6 @@ public interface FlowComponent {
 
     Component getComponent();
 
+    void setVisibile(boolean visibility);
+
 }

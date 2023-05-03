@@ -54,6 +54,8 @@ public class FlowActions {
     }
 
     public void initializeClassTree() {
+        currentClassHandler = null;
+
         try {
             //  Create class handler
             currentClassHandler = new ClassHandler(currentFile);

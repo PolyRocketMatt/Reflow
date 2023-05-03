@@ -27,4 +27,9 @@ public class FlowPanel implements FlowComponent {
     public JPanel getComponent() {
         return panel;
     }
+
+    @Override
+    public void setVisibile(boolean visibility) {
+        panel.setVisible(visibility);
+    }
 }

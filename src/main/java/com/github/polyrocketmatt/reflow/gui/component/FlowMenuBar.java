@@ -18,4 +18,9 @@ public class FlowMenuBar implements FlowComponent {
     public JMenuBar getComponent() {
         return menuBar;
     }
+
+    @Override
+    public void setVisibile(boolean visibility) {
+
+    }
 }

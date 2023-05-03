@@ -18,6 +18,11 @@ public class FlowTab implements FlowComponent {
         return panel;
     }
 
+    @Override
+    public void setVisibile(boolean visibility) {
+        panel.setVisible(visibility);
+    }
+
     public String getTabName() {
         return tabName;
     }
