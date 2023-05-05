@@ -1,4 +1,4 @@
-package com.github.polyrocketmatt.reflow.wrapper;
+package com.github.polyrocketmatt.reflow.asm.wrapper;
 
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.commons.CodeSizeEvaluator;

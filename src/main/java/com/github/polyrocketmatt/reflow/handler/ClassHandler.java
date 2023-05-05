@@ -1,8 +1,8 @@
 package com.github.polyrocketmatt.reflow.handler;
 
+import com.github.polyrocketmatt.reflow.asm.decompilation.DependencyDecompiler;
 import com.github.polyrocketmatt.reflow.utils.ByteUtils;
-import com.github.polyrocketmatt.reflow.utils.types.JavaLangTypes;
-import com.github.polyrocketmatt.reflow.wrapper.ClassWrapper;
+import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 import com.google.common.io.ByteStreams;
 import org.objectweb.asm.tree.ClassNode;
 import org.slf4j.Logger;
@@ -33,9 +33,6 @@ public class ClassHandler {
         this.resources = new HashMap<>();
         this.logger = LoggerFactory.getLogger("ClassHandler");
 
-        //  Load built-in types
-        Arrays.stream(JavaLangTypes.values()).forEach(type -> internalClasses.add(new ClassWrapper(type.getName(), true)));
-
         try {
             run();
         } catch (Exception ex) {
@@ -54,8 +51,10 @@ public class ClassHandler {
 
                 if (name.endsWith(".class")) {
                     ClassNode classNode = ByteUtils.parseBytesToClassNode(data);
+                    DependencyDecompiler dependencyDecompiler = ByteUtils.parseDependencies(data);
+                    ClassWrapper wrapper = new ClassWrapper(classNode, dependencyDecompiler.getImports(), false);
 
-                    classes.put(new ClassWrapper(classNode, false), name);
+                    classes.put(wrapper, name);
                 } else {
                     if (name.equals("META-INF/MANIFEST.MF")) {
                         String manifest = new String(data);

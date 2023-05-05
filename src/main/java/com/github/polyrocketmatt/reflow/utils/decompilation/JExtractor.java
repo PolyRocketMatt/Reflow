@@ -1,6 +1,6 @@
-package com.github.polyrocketmatt.reflow.utils;
+package com.github.polyrocketmatt.reflow.utils.decompilation;
 
-import com.github.polyrocketmatt.reflow.wrapper.ClassWrapper;
+import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class JarExtractor {
+public class JExtractor {
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void extractClasses(File jarFile, File tempDir, Set<ClassWrapper> wrappers) throws IOException {

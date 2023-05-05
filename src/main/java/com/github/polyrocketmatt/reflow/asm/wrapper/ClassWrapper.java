@@ -1,7 +1,6 @@
-package com.github.polyrocketmatt.reflow.wrapper;
+package com.github.polyrocketmatt.reflow.asm.wrapper;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 
 import java.util.Set;
@@ -10,6 +9,7 @@ import java.util.stream.Collectors;
 public class ClassWrapper implements Wrapper {
 
     private final ClassNode node;
+    private final Set<String> imports;
     private final Set<MethodWrapper> methodWrappers;
     private final Set<FieldWrapper> fieldWrappers;
 
@@ -17,8 +17,9 @@ public class ClassWrapper implements Wrapper {
     private final String simpleName;
     private final boolean isLibraryNode;
 
-    public ClassWrapper(@NotNull ClassNode node, boolean isLibraryNode) {
+    public ClassWrapper(@NotNull ClassNode node, @NotNull Set<String> imports, boolean isLibraryNode) {
         this.node = node;
+        this.imports = imports;
         this.methodWrappers = node.methods
                 .stream()
                 .map(MethodWrapper::new)
@@ -34,8 +35,9 @@ public class ClassWrapper implements Wrapper {
         this.simpleName = split[split.length - 1];
     }
 
-    public ClassWrapper(String name, boolean isLibraryNode) {
+    public ClassWrapper(@NotNull String name, @NotNull Set<String> imports, boolean isLibraryNode) {
         this.node = null;
+        this.imports = imports;
         this.methodWrappers = null;
         this.fieldWrappers = null;
         this.isLibraryNode = isLibraryNode;
@@ -45,6 +47,10 @@ public class ClassWrapper implements Wrapper {
 
     public ClassNode getNode() {
         return node;
+    }
+
+    public Set<String> getImports() {
+        return imports;
     }
 
     public Set<MethodWrapper> getMethodWrappers() {
@@ -66,4 +72,5 @@ public class ClassWrapper implements Wrapper {
     public boolean isLibraryNode() {
         return isLibraryNode;
     }
+
 }

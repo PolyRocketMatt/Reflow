@@ -170,8 +170,6 @@ public class FlowInterface extends JFrame {
     }
 
     public void setVisibility(int index) {
-        System.out.println("Setting visibility to " + index);
-
         if (index < 0 || index >= panels.size())
             throw new IllegalArgumentException("Index out of bounds");
         panels.forEach(panel -> panel.getComponent().setVisible(panel.getIndex() == index));

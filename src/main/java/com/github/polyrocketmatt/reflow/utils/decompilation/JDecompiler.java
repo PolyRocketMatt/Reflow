@@ -1,4 +1,4 @@
-package com.github.polyrocketmatt.reflow.utils;
+package com.github.polyrocketmatt.reflow.utils.decompilation;
 
 import org.jd.core.v1.ClassFileToJavaSourceDecompiler;
 import org.jd.core.v1.api.loader.Loader;
@@ -11,43 +11,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Decompiler {
+public class JDecompiler {
 
     private final Loader jdLoader;
     private final Printer jdPrinter;
     private final String decompiledSource;
 
-    public Decompiler(String source) {
-        this.jdLoader = new Loader() {
-            @Override
-            public byte[] load(String internalName) throws LoaderException {
-                try (InputStream is = new FileInputStream(source)) {
-                    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                        byte[] buffer = new byte[1024];
-                        int read = is.read(buffer);
-
-                        while (read > 0) {
-                            out.write(buffer, 0, read);
-                            read = is.read(buffer);
-                        }
-
-                        return out.toByteArray();
-                    } catch (IOException ex) {
-                        throw new LoaderException(ex);
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-
-                return null;
-            }
-
-            @Override
-            public boolean canLoad(String internalName) {
-                return new File(internalName).exists();
-            }
-        };
-
+    public JDecompiler(String pathToSource) {
+        this.jdLoader = getLoader(pathToSource);
         this.jdPrinter = new Printer() {
             private static final String TAB = "  ";
             private static final String NEWLINE = "\n";
@@ -125,6 +96,7 @@ public class Decompiler {
 
             @Override
             public void startMarker(int type) {
+
             }
 
             @Override
@@ -135,7 +107,7 @@ public class Decompiler {
         ClassFileToJavaSourceDecompiler decompiler = new ClassFileToJavaSourceDecompiler();
 
         try {
-            decompiler.decompile(jdLoader, jdPrinter, source);
+            decompiler.decompile(jdLoader, jdPrinter, pathToSource);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -154,4 +126,37 @@ public class Decompiler {
     public String getDecompiledSource() {
         return decompiledSource;
     }
+
+    public static Loader getLoader(String path) {
+        return new Loader() {
+            @Override
+            public byte[] load(String internalName) throws LoaderException {
+                try (InputStream is = new FileInputStream(path)) {
+                    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                        byte[] buffer = new byte[1024];
+                        int read = is.read(buffer);
+
+                        while (read > 0) {
+                            out.write(buffer, 0, read);
+                            read = is.read(buffer);
+                        }
+
+                        return out.toByteArray();
+                    } catch (IOException ex) {
+                        throw new LoaderException(ex);
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+
+                return null;
+            }
+
+            @Override
+            public boolean canLoad(String internalName) {
+                return new File(internalName).exists();
+            }
+        };
+    }
+
 }

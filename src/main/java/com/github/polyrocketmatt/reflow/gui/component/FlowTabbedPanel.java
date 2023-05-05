@@ -112,8 +112,6 @@ public class FlowTabbedPanel implements FlowComponent {
 
             @Override
             public void mouseEntered(MouseEvent event) {
-                System.out.println("OK");
-
                 closeButton.setBackground(PALETTE.getRed());
             }
 

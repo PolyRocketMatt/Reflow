@@ -1,8 +1,6 @@
 package com.github.polyrocketmatt.reflow.gui.component;
 
-import com.github.polyrocketmatt.reflow.handler.BuiltInTypeHandler;
-import com.github.polyrocketmatt.reflow.utils.Pair;
-import com.github.polyrocketmatt.reflow.wrapper.ClassWrapper;
+import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -11,31 +9,35 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
 
 public class FlowSyntaxHighlightedTextView implements FlowComponent {
 
+    private final String source;
+    private final ClassWrapper wrapper;
     private final JTextPane textPane;
-    private final Set<ClassWrapper> types;
+    private final StyledDocument document;
+    private final Set<String> types;
 
     private final Style keywordStyle;
     private final Style literalStyle;
     private final Style typeStyle;
     private final Style stringStyle;
 
-    public FlowSyntaxHighlightedTextView(String source, Set<ClassWrapper> wrappers) {
+    public FlowSyntaxHighlightedTextView(ClassWrapper wrapper, String source) {
+        this.source = source;
+        this.wrapper = wrapper;
         this.textPane = new JTextPane();
         this.textPane.setEditable(false);
         this.textPane.setFont(new Font("Consolas", Font.PLAIN, 12));
         this.textPane.setMargin(new Insets(5, 5, 5, 5));
 
-        this.types = new HashSet<>(wrappers);
-        this.types.addAll(BuiltInTypeHandler.getAllBuiltInTypes());
-        StyledDocument document = textPane.getStyledDocument();
+        this.types = parseTypes(wrapper);
+        this.document = textPane.getStyledDocument();
 
         //  Keywords
         this.keywordStyle = document.addStyle("keyword", null);
@@ -53,6 +55,127 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         this.stringStyle = document.addStyle("string", null);
         StyleConstants.setForeground(stringStyle, PALETTE.getStringTint());
 
+        types.forEach(System.out::println);
+
+        parsePackage();
+        parseImports();
+        parseClass();
+    }
+
+    @Override
+    public JTextPane getComponent() {
+        return textPane;
+    }
+
+    @Override
+    public void setVisibile(boolean visibility) {
+        textPane.setVisible(visibility);
+    }
+
+    private void insert(StyledDocument document, int length, String part, Style style) {
+        try { document.insertString(length, part, style); }
+        catch (BadLocationException exception) { exception.printStackTrace(); }
+    }
+
+    private void parseWalkedString(StyledDocument document, String walkedString) {
+        //  Otherwise, we treat the walked string.
+        String[] primitiveParts = walkedString.split(" ");
+
+        //  Re-organize strings
+        List<String> parts = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
+        boolean isBuildingString = false;
+        for (String part : primitiveParts) {
+            if (part.startsWith("\"")) {
+                stringBuilder.append(part).append(" ");
+
+                isBuildingString = true;
+            }
+
+            else if (part.endsWith("\"")) {
+                stringBuilder.append(part);
+                parts.add(stringBuilder.toString());
+
+                //  Reset the string builder
+                stringBuilder = new StringBuilder();
+                isBuildingString = false;
+            }
+
+            else if (isBuildingString)
+                stringBuilder.append(part).append(" ");
+
+            else
+                parts.add(part);
+        }
+
+        for (String part : parts) {
+            //  Check if the part is a keyword
+            if (KEYWORDS.contains(part))
+                insert(document, document.getLength(), part + " ", keywordStyle);
+
+                //  Check if the part is a literal
+            else if (LITERALS.contains(part))
+                insert(document, document.getLength(), part, literalStyle);
+
+                //  Check if the part is a type
+            else if (types.stream().anyMatch(type -> type.equals(part)))
+                insert(document, document.getLength(), part + " ", typeStyle);
+
+                //  Check if the part is a string
+            else if (part.startsWith("\"") && part.endsWith("\""))
+                insert(document, document.getLength(), part, stringStyle);
+
+                //  Otherwise, it's something unknown.
+            else if (part.isEmpty())
+                insert(document, document.getLength(), " ", null);
+
+            else
+                insert(document, document.getLength(), part, null);
+        }
+    }
+
+    private Pair<String, Integer> walk(String input, int currentIndex) {
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        while (index < input.length()) {
+            String character = input.substring(index, index + 1);
+
+            if (PUNCTUATION.contains(character)) {
+                return new Pair<>(builder.toString(), index + currentIndex);
+            } else {
+                builder.append(character);
+                index++;
+            }
+        }
+
+        return new Pair<>(builder.toString(), index + currentIndex);
+    }
+
+    private Set<String> parseTypes(ClassWrapper wrapper) {
+        return wrapper.getImports().stream().map(dependency -> dependency.substring(dependency.lastIndexOf(".") + 1)).collect(Collectors.toSet());
+    }
+
+    private void parsePackage() {
+        String pkg = (wrapper.getNode().name).replace("/", ".");
+
+        insert(document, document.getLength(), "package ", keywordStyle);
+        insert(document, document.getLength(), pkg + ";\n", null);
+        insert(document, document.getLength(), "\n", null);
+    }
+
+    private void parseImports() {
+        Set<String> imports = wrapper.getImports();
+
+        imports.forEach(dependency -> {
+            insert(document, document.getLength(), "import ", keywordStyle);
+            insert(document, document.getLength(), dependency + ";", null);
+            insert(document, document.getLength(), "\n", null);
+        });
+
+        insert(document, document.getLength(), "\n", null);
+    }
+
+    private void parseClass() {
         String[] lines = source.split("\n");
         for (String line : lines) {
             if (line.isEmpty()) {
@@ -132,95 +255,6 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         }
     }
 
-    @Override
-    public JTextPane getComponent() {
-        return textPane;
-    }
-
-    @Override
-    public void setVisibile(boolean visibility) {
-        textPane.setVisible(visibility);
-    }
-
-    private void insert(StyledDocument document, int length, String part, Style style) {
-        try { document.insertString(length, part, style); }
-        catch (BadLocationException exception) { exception.printStackTrace(); }
-    }
-
-    private void parseWalkedString(StyledDocument document, String walkedString) {
-        //  Otherwise, we treat the walked string.
-        String[] primitiveParts = walkedString.split(" ");
-
-        //  Re-organize strings
-        List<String> parts = new ArrayList<>();
-        StringBuilder stringBuilder = new StringBuilder();
-        boolean isBuildingString = false;
-        for (String part : primitiveParts) {
-            if (part.startsWith("\"")) {
-                stringBuilder.append(part).append(" ");
-
-                isBuildingString = true;
-            }
-
-            else if (part.endsWith("\"")) {
-                stringBuilder.append(part);
-                parts.add(stringBuilder.toString());
-
-                //  Reset the string builder
-                stringBuilder = new StringBuilder();
-                isBuildingString = false;
-            }
-
-            else if (isBuildingString)
-                stringBuilder.append(part).append(" ");
-
-            else
-                parts.add(part);
-        }
-
-        for (String part : parts) {
-            //  Check if the part is a keyword
-            if (KEYWORDS.contains(part))
-                insert(document, document.getLength(), part + " ", keywordStyle);
-
-                //  Check if the part is a literal
-            else if (LITERALS.contains(part))
-                insert(document, document.getLength(), part, literalStyle);
-
-                //  Check if the part is a type
-            else if (types.stream().anyMatch(type -> type.getSimpleName().equals(part)))
-                insert(document, document.getLength(), part + " ", typeStyle);
-
-                //  Check if the part is a string
-            else if (part.startsWith("\"") && part.endsWith("\""))
-                insert(document, document.getLength(), part, stringStyle);
-
-                //  Otherwise, it's something unknown.
-            else if (part.isEmpty())
-                insert(document, document.getLength(), " ", null);
-
-            else
-                insert(document, document.getLength(), part, null);
-        }
-    }
-
-    private Pair<String, Integer> walk(String input, int currentIndex) {
-        StringBuilder builder = new StringBuilder();
-        int index = 0;
-        while (index < input.length()) {
-            String character = input.substring(index, index + 1);
-
-            if (PUNCTUATION.contains(character)) {
-                return new Pair<>(builder.toString(), index + currentIndex);
-            } else {
-                builder.append(character);
-                index++;
-            }
-        }
-
-        return new Pair<>(builder.toString(), index + currentIndex);
-    }
-
     private static final Set<String> PUNCTUATION = Set.of(
             "(", ")", "{", "}", "[", "]",
             ";", ",", ".", ":", "?", "@", "="
@@ -246,5 +280,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
     );
 
     private static final Set<String> LITERALS = Set.of("true", "false", "null");
+
+    private record Pair<A, B>(A a, B b) { }
 
 }

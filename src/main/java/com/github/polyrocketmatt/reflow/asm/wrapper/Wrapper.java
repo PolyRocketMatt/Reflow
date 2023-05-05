@@ -1,4 +1,4 @@
-package com.github.polyrocketmatt.reflow.wrapper;
+package com.github.polyrocketmatt.reflow.asm.wrapper;
 
 import org.objectweb.asm.Opcodes;
 

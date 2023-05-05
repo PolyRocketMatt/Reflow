@@ -1,12 +1,11 @@
 package com.github.polyrocketmatt.reflow.gui;
 
 import com.github.polyrocketmatt.reflow.handler.ClassHandler;
-import com.github.polyrocketmatt.reflow.utils.JarExtractor;
+import com.github.polyrocketmatt.reflow.utils.decompilation.JExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
@@ -61,7 +60,7 @@ public class FlowActions {
             currentClassHandler = new ClassHandler(currentFile);
 
             //  Extract classes from JAR and store in temp directory
-            JarExtractor.extractClasses(currentFile, TEMP_DIR, currentClassHandler.getClasses().keySet());
+            JExtractor.extractClasses(currentFile, TEMP_DIR, currentClassHandler.getClasses().keySet());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

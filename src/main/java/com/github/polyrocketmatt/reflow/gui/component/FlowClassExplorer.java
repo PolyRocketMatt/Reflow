@@ -1,18 +1,22 @@
 package com.github.polyrocketmatt.reflow.gui.component;
 
 import com.formdev.flatlaf.icons.FlatFileViewFileIcon;
-import com.github.polyrocketmatt.reflow.utils.Decompiler;
-import com.github.polyrocketmatt.reflow.utils.SortedTreeModel;
-import com.github.polyrocketmatt.reflow.wrapper.ClassWrapper;
+import com.github.polyrocketmatt.reflow.utils.decompilation.JDecompiler;
+import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.io.File;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -104,9 +108,10 @@ public class FlowClassExplorer implements FlowComponent {
 
                 String classPath = builder.toString();
                 String className = classPath.split("/")[classPath.split("/").length - 1];
+                ClassWrapper wrapper = wrappers.stream().filter(w -> w.getSimpleName().equals(className)).findFirst().orElse(null);
 
                 //  TODO: Decompile the class based on the class name
-                decompileClass(classPath, className, wrappers);
+                decompileClass(wrapper, classPath, className, wrappers);
             }
         });
 
@@ -148,7 +153,7 @@ public class FlowClassExplorer implements FlowComponent {
         }
     }
 
-    private void decompileClass(String classPath, String className, Set<ClassWrapper> wrappers) {
+    private void decompileClass(ClassWrapper wrapper, String classPath, String className, Set<ClassWrapper> wrappers) {
         //  First we check if there already is a tab with the same name
         if (decompiledTabs.getTabByName(className) != null) {
             decompiledTabs.setSelectedTab(decompiledTabs.getIndexOf(decompiledTabs.getTabByName(className)));
@@ -161,18 +166,56 @@ public class FlowClassExplorer implements FlowComponent {
         //  Check if the file exists
         String absolutePath = selectedFile.getAbsolutePath();
 
+        //  Get the plain text of the selected file
+        String plainText = "";
+
         //  Decompile
-        Decompiler decompiler = new Decompiler(absolutePath);
+        JDecompiler decompiler = new JDecompiler(absolutePath);
         String decompiledSource = decompiler.getDecompiledSource();
 
         //  Create syntax-highlighted text area
-        FlowSyntaxHighlightedTextView decompiledTextPane = new FlowSyntaxHighlightedTextView(decompiledSource, wrappers);
+        FlowSyntaxHighlightedTextView decompiledTextPane = new FlowSyntaxHighlightedTextView(wrapper, decompiledSource);
         FlowTab decompiledTab = new FlowTab(className);
 
         //  Finally, we add the tab to the tabbed pane and set it as the selected tab
         decompiledTab.getComponent().add(decompiledTextPane.getComponent(), BorderLayout.CENTER);
         decompiledTabs.add(decompiledTab);
         decompiledTabs.setSelectedTab(decompiledTab);
+    }
+
+    public static class SortedTreeModel extends DefaultTreeModel {
+
+        public SortedTreeModel(DefaultMutableTreeNode root) {
+            super(root);
+        }
+
+        @Override
+        public void insertNodeInto(MutableTreeNode newChild, MutableTreeNode parent, int index) {
+            super.insertNodeInto(newChild, parent, index);
+        }
+
+        public void sortChildren(MutableTreeNode node) {
+            if (node.getChildCount() > 0) {
+                java.util.List<MutableTreeNode> children = new java.util.ArrayList<>(Collections.list(node.children()).stream().map(o -> (MutableTreeNode) o).toList());
+                children.sort((Comparator<TreeNode>) (o1, o2) -> o1.toString().compareToIgnoreCase(o2.toString()));
+                children.forEach(node::remove);
+
+                //  First we find the children without children
+                java.util.List<MutableTreeNode> leafs = children.stream().filter(child -> child.getChildCount() == 0).toList();
+                List<MutableTreeNode> branches = children.stream().filter(child -> child.getChildCount() > 0).toList();
+
+                //  We first handle the branches
+                for (MutableTreeNode child : branches) {
+                    node.insert(child, node.getChildCount());
+                    sortChildren(child);
+                }
+
+                //  Finally we add the leafs
+                for (MutableTreeNode child : leafs)
+                    node.insert(child, node.getChildCount());
+            }
+        }
+
     }
 
 }
