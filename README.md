@@ -9,7 +9,7 @@
 
 <h1 align="center">ReFlow</h1>
 
-ReFlow is a powerful and easy-to-use Java bytecode tool and obfuscator. It is primarily developed for personal
+ReFlow is a powerful and easy-to-use Java bytecode analysing tool and obfuscator. It is primarily developed for personal
 reasons and is an open-source project (GPL v3 License). Currently, ReFlow supports the following
 types of obfuscation:
 

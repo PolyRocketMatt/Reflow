@@ -95,7 +95,7 @@ public class ClassFileDecompiler extends ClassVisitor {
                     if (isArray) {
                         List<?> objects = (List<?>) value.second();
 
-                        pane.insert("[", pane.getAnnotationStyle());
+                        pane.insert("{", pane.getAnnotationStyle());
 
                         int listIndex = 0;
                         for (Object object : objects) {
@@ -114,7 +114,7 @@ public class ClassFileDecompiler extends ClassVisitor {
                             listIndex++;
                         }
 
-                        pane.insert("]", pane.getAnnotationStyle());
+                        pane.insert("}", pane.getAnnotationStyle());
                     } else {
                         if (isString)
                             pane.insert("\"" + value.second().toString() + "\"", pane.getStringLiteralStyle());
