@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.github.polyrocketmatt.reflow.gui.FlowConstants.ASM_VERSION;
 import static org.objectweb.asm.Opcodes.ASM9;
 
 public class AsmAnnotationDecompiler extends ClassVisitor {
@@ -40,7 +41,7 @@ public class AsmAnnotationDecompiler extends ClassVisitor {
         private final AnnotationInformation information;
 
         public AnnotationDecompiler(String annotationDescriptor, AsmAnnotationDecompiler asmDecompiler) {
-            super(ASM9);
+            super(ASM_VERSION);
             this.annotationDescriptor = annotationDescriptor;
             this.annotationDecompiler = asmDecompiler;
             this.information = new AnnotationInformation(annotationDescriptor, new HashMap<>());
@@ -61,7 +62,7 @@ public class AsmAnnotationDecompiler extends ClassVisitor {
         @SuppressWarnings({"unchecked", "rawtypes"})
         @Override
         public AnnotationVisitor visitArray(String arrayName) {
-            return new AnnotationVisitor(ASM9) {
+            return new AnnotationVisitor(ASM_VERSION) {
                 @Override
                 public void visit(String descriptor, Object value) {
                     //  Get the type of the value

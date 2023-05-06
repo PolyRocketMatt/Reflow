@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.objectweb.asm.Opcodes.ASM9;
+import static com.github.polyrocketmatt.reflow.gui.FlowConstants.ASM_VERSION;
 
 public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler {
 
@@ -29,15 +29,15 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
     private final AnnotationDecompiler annotationVisitor;
 
     public AsmDependencyDecompiler() {
-        super(ASM9);
+        super(ASM_VERSION);
 
         this.packages = new HashSet<>();
         this.imports = new HashSet<>();
         this.occurrences = new HashMap<>();
-        this.methodVisitor = new MethodDecompiler(ASM9, this);
-        this.signatureVisitor = new SignatureDecompiler(ASM9);
-        this.fieldVisitor = new FieldDecompiler(ASM9);
-        this.annotationVisitor = new AnnotationDecompiler(ASM9);
+        this.methodVisitor = new MethodDecompiler(this);
+        this.signatureVisitor = new SignatureDecompiler();
+        this.fieldVisitor = new FieldDecompiler();
+        this.annotationVisitor = new AnnotationDecompiler(this);
     }
 
     public Set<String> getPackages() {
@@ -144,10 +144,43 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
         return annotationVisitor;
     }
 
+    private static class AnnotationTypeHandler extends AnnotationVisitor {
+
+        private final AsmDependencyDecompiler decompiler;
+
+        public AnnotationTypeHandler(AsmDependencyDecompiler decompiler) {
+            super(ASM_VERSION);
+            this.decompiler = decompiler;
+        }
+
+        @Override
+        public void visit(String name, Object value) {}
+
+        @Override
+        public void visitEnum(String name, String descriptor, String value) {
+            //  Add descriptor to imports
+            String typeDescriptor = descriptor.substring(1, descriptor.length() - 1);
+            decompiler.addName(typeDescriptor);
+        }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String name, String descriptor) {
+            return new AnnotationTypeHandler(decompiler);
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            return new AnnotationTypeHandler(decompiler);
+        }
+    }
+
     private static class AnnotationDecompiler extends AnnotationVisitor {
 
-        public AnnotationDecompiler(int api) {
-            super(api);
+        private final AsmDependencyDecompiler decompiler;
+
+        public AnnotationDecompiler(AsmDependencyDecompiler decompiler) {
+            super(ASM_VERSION);
+            this.decompiler = decompiler;
         }
 
         @Override
@@ -159,6 +192,16 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
         public void visitEnum(String name, String descriptor, String value) {
             super.visitEnum(name, descriptor, value);
         }
+
+        @Override
+        public AnnotationVisitor visitAnnotation(String name, String descriptor) {
+            return new AnnotationTypeHandler(decompiler);
+        }
+
+        @Override
+        public AnnotationVisitor visitArray(String name) {
+            return new AnnotationTypeHandler(decompiler);
+        }
     }
 
     private static class MethodDecompiler extends MethodVisitor {
@@ -166,10 +209,10 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
         private final AsmDependencyDecompiler decompiler;
         private final AnnotationVisitor annotationVisitor;
 
-        public MethodDecompiler(int api, AsmDependencyDecompiler decompiler) {
-            super(api);
+        public MethodDecompiler(AsmDependencyDecompiler decompiler) {
+            super(ASM_VERSION);
             this.decompiler = decompiler;
-            this.annotationVisitor = new AnnotationDecompiler(api);
+            this.annotationVisitor = new AnnotationDecompiler(decompiler);
         }
 
         public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
@@ -232,16 +275,16 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
 
     private static class FieldDecompiler extends FieldVisitor {
 
-        public FieldDecompiler(int api) {
-            super(api);
+        public FieldDecompiler() {
+            super(ASM_VERSION);
         }
 
     }
 
     private static class SignatureDecompiler extends SignatureVisitor {
 
-        public SignatureDecompiler(int api) {
-            super(api);
+        public SignatureDecompiler() {
+            super(ASM_VERSION);
         }
 
         public void addSignature(String sign) {

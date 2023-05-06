@@ -4,15 +4,14 @@ import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmAnnotationDecom
 import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 import com.github.polyrocketmatt.reflow.gui.component.FlowStylePane;
 import com.github.polyrocketmatt.reflow.utils.types.Pair;
-import org.checkerframework.checker.units.qual.A;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AnnotationNode;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import static com.github.polyrocketmatt.reflow.gui.FlowConstants.ASM_VERSION;
 
 public class ClassFileDecompiler extends ClassVisitor {
 
@@ -26,7 +25,7 @@ public class ClassFileDecompiler extends ClassVisitor {
     private int access;
 
     public ClassFileDecompiler(String source, ClassWrapper wrapper, FlowStylePane pane, String offset) {
-        super(Opcodes.ASM9);
+        super(ASM_VERSION);
 
         this.source = source;
         this.wrapper = wrapper;
@@ -42,7 +41,6 @@ public class ClassFileDecompiler extends ClassVisitor {
         reader.accept(this, 0);
 
         //  We first parse the access and modifier flags
-        AnnotationNode[] annotations = getAnnotations();
         String accessModifier = getAccess();
         String staticModifier = isStatic() ? "static" : "";
         String finalModifier = isFinal() ? "final" : "";
@@ -204,19 +202,6 @@ public class ClassFileDecompiler extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         this.access = access;
-    }
-
-    public AnnotationNode[] getAnnotations() {
-        List<AnnotationNode> annotations = new ArrayList<>();
-
-        if (wrapper.getNode().visibleAnnotations != null)
-            annotations.addAll(wrapper.getNode().visibleAnnotations);
-        if (wrapper.getNode().invisibleAnnotations != null)
-            annotations.addAll(wrapper.getNode().invisibleAnnotations);
-        if (wrapper.getNode().visibleTypeAnnotations != null)
-            annotations.addAll(wrapper.getNode().visibleTypeAnnotations);
-
-        return annotations.toArray(AnnotationNode[]::new);
     }
 
     public String getAccess() {
