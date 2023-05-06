@@ -140,19 +140,19 @@ public class ClassFileDecompiler extends ClassVisitor {
 
         //      Insert access modifier
         pane.insert(accessModifier, pane.getKeywordStyle());
-        pane.insert(accessModifier.isBlank() ? "" : " ");
+        pane.insert(separator(accessModifier));
 
         //      Insert static modifier
         pane.insert(staticModifier, pane.getKeywordStyle());
-        pane.insert(staticModifier.isBlank() ? "" : " ");
+        pane.insert(separator(staticModifier));
 
         //      Insert final modifier
         pane.insert(finalModifier, pane.getKeywordStyle());
-        pane.insert(finalModifier.isBlank() ? "" : " ");
+        pane.insert(separator(finalModifier));
 
         //      Insert abstract modifier
         pane.insert(abstractModifier, pane.getKeywordStyle());
-        pane.insert(abstractModifier.isBlank() ? "" : " ");
+        pane.insert(separator(abstractModifier));
 
         //      Insert class type
         pane.insert(classType, isAnnotation ? pane.getAnnotationStyle() : pane.getKeywordStyle());
@@ -204,7 +204,11 @@ public class ClassFileDecompiler extends ClassVisitor {
         this.access = access;
     }
 
-    public String getAccess() {
+    private String separator(String input) {
+        return input.isBlank() ? "" : " ";
+    }
+
+    private String getAccess() {
         if (isPublic())
             return "public";
         else if (isPrivate())
@@ -214,7 +218,7 @@ public class ClassFileDecompiler extends ClassVisitor {
         return "";
     }
 
-    public String getClassType() {
+    private String getClassType() {
         if (isAnnotation())
             return "@interface";
         else if (isInterface())
@@ -226,43 +230,43 @@ public class ClassFileDecompiler extends ClassVisitor {
         return "class";
     }
 
-    public boolean isPublic() {
+    private boolean isPublic() {
         return (access & Opcodes.ACC_PUBLIC) != 0;
     }
 
-    public boolean isPrivate() {
+    private boolean isPrivate() {
         return (access & Opcodes.ACC_PRIVATE) != 0;
     }
 
-    public boolean isProtected() {
+    private boolean isProtected() {
         return (access & Opcodes.ACC_PROTECTED) != 0;
     }
 
-    public boolean isStatic() {
+    private boolean isStatic() {
         return (access & Opcodes.ACC_STATIC) != 0;
     }
 
-    public boolean isAbstract() {
+    private boolean isAbstract() {
         return (access & Opcodes.ACC_ABSTRACT) != 0 && !isInterface() && !isAnnotation();
     }
 
-    public boolean isFinal() {
+    private boolean isFinal() {
         return (access & Opcodes.ACC_FINAL) != 0;
     }
 
-    public boolean isInterface() {
+    private boolean isInterface() {
         return (access & Opcodes.ACC_INTERFACE) != 0;
     }
 
-    public boolean isAnnotation() {
+    private boolean isAnnotation() {
         return (access & Opcodes.ACC_ANNOTATION) != 0;
     }
 
-    public boolean isEnum() {
+    private boolean isEnum() {
         return (access & Opcodes.ACC_ENUM) != 0;
     }
 
-    public boolean isModule() {
+    private boolean isModule() {
         return (access & Opcodes.ACC_MODULE) != 0;
     }
 
