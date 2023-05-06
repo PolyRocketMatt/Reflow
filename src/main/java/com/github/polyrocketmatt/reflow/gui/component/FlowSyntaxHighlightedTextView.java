@@ -1,5 +1,6 @@
 package com.github.polyrocketmatt.reflow.gui.component;
 
+import com.github.polyrocketmatt.reflow.asm.decompilation.visitor.ClassFileDecompiler;
 import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 
 import javax.swing.*;
@@ -7,9 +8,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,43 +18,30 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
 
     private final String source;
     private final ClassWrapper wrapper;
-    private final JTextPane textPane;
-    private final StyledDocument document;
     private final Set<String> types;
-
-    private final Style keywordStyle;
-    private final Style literalStyle;
-    private final Style typeStyle;
-    private final Style stringStyle;
+    private final FlowStylePane stylePane;
 
     public FlowSyntaxHighlightedTextView(ClassWrapper wrapper, String source) {
         this.source = source;
         this.wrapper = wrapper;
-        this.textPane = new JTextPane();
-        this.textPane.setEditable(false);
-        this.textPane.setFont(new Font("Consolas", Font.PLAIN, 12));
-        this.textPane.setMargin(new Insets(5, 5, 5, 5));
 
-        this.types = parseTypes(wrapper);
-        this.document = textPane.getStyledDocument();
+        this.types = parseTypes();
+        this.stylePane = new FlowStylePane(types);
 
         //  Keywords
-        this.keywordStyle = document.addStyle("keyword", null);
-        StyleConstants.setForeground(keywordStyle, PALETTE.getKeywordTint());
+        StyleConstants.setForeground( stylePane.getKeywordStyle(), PALETTE.getKeywordTint());
 
         //  Literals
-        this.literalStyle = document.addStyle("literal", null);
-        StyleConstants.setForeground(literalStyle, PALETTE.getLiteralTint());
+        StyleConstants.setForeground(stylePane.getLiteralStyle(), PALETTE.getLiteralTint());
 
         //  Types
-        this.typeStyle = document.addStyle("type", null);
-        StyleConstants.setForeground(typeStyle, PALETTE.getTypeTint());
+        StyleConstants.setForeground(stylePane.getTypeStyle(), PALETTE.getTypeTint());
 
         //  Strings
-        this.stringStyle = document.addStyle("string", null);
-        StyleConstants.setForeground(stringStyle, PALETTE.getStringTint());
+        StyleConstants.setForeground(stylePane.getStringLiteralStyle(), PALETTE.getStringTint());
 
-        types.forEach(System.out::println);
+        //  Annotations
+        StyleConstants.setForeground(stylePane.getAnnotationStyle(), PALETTE.getAnnotationStyle());
 
         parsePackage();
         parseImports();
@@ -64,12 +50,12 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
 
     @Override
     public JTextPane getComponent() {
-        return textPane;
+        return stylePane.getComponent();
     }
 
     @Override
     public void setVisibile(boolean visibility) {
-        textPane.setVisible(visibility);
+        stylePane.setVisibile(visibility);
     }
 
     private void insert(StyledDocument document, int length, String part, Style style) {
@@ -77,6 +63,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         catch (BadLocationException exception) { exception.printStackTrace(); }
     }
 
+    /*
     private void parseWalkedString(StyledDocument document, String walkedString) {
         //  Otherwise, we treat the walked string.
         String[] primitiveParts = walkedString.split(" ");
@@ -109,7 +96,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         }
 
         for (String part : parts) {
-            //  Check if the part is a keyword
+                //  Check if the part is a keyword
             if (KEYWORDS.contains(part))
                 insert(document, document.getLength(), part + " ", keywordStyle);
 
@@ -151,33 +138,50 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         return new Pair<>(builder.toString(), index + currentIndex);
     }
 
-    private Set<String> parseTypes(ClassWrapper wrapper) {
+     */
+
+    private Set<String> parseTypes() {
         return wrapper.getImports().stream().map(dependency -> dependency.substring(dependency.lastIndexOf(".") + 1)).collect(Collectors.toSet());
     }
 
     private void parsePackage() {
         String pkg = (wrapper.getNode().name).replace("/", ".");
 
-        insert(document, document.getLength(), "package ", keywordStyle);
-        insert(document, document.getLength(), pkg + ";\n", null);
-        insert(document, document.getLength(), "\n", null);
+        stylePane.insert("package ", stylePane.getKeywordStyle());
+        stylePane.insert(pkg + ";\n", null);
+        stylePane.insert("\n", null);
     }
 
     private void parseImports() {
         Set<String> imports = wrapper.getImports();
 
+        //  Sort the imports
+        imports = imports.stream().sorted().collect(Collectors.toCollection(LinkedHashSet::new));
+
+        //  Remove the object class
+        imports.remove("java.lang.Object");
+
+        //  Insert the imports into the document
         imports.forEach(dependency -> {
-            insert(document, document.getLength(), "import ", keywordStyle);
-            insert(document, document.getLength(), dependency + ";", null);
-            insert(document, document.getLength(), "\n", null);
+            stylePane.insert("import ", stylePane.getKeywordStyle());
+            stylePane.insert(dependency + ";\n", null);
         });
 
-        insert(document, document.getLength(), "\n", null);
+        stylePane.insert("\n", null);
     }
 
     private void parseClass() {
+        ClassFileDecompiler decompiler = new ClassFileDecompiler(source, wrapper, stylePane);
+    }
+
+    /*
+    private void parseClassOld() {
         String[] lines = source.split("\n");
         for (String line : lines) {
+            //  Skip "imports"
+            if (line.startsWith("import"))
+                continue;
+
             if (line.isEmpty()) {
                 insert(document, document.getLength(), "\n", null);
                 continue;
@@ -254,6 +258,8 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
             }
         }
     }
+
+     */
 
     private static final Set<String> PUNCTUATION = Set.of(
             "(", ")", "{", "}", "[", "]",

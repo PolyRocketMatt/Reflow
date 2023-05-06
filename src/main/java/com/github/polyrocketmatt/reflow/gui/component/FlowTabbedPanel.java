@@ -108,16 +108,19 @@ public class FlowTabbedPanel implements FlowComponent {
             public void mouseClicked(MouseEvent event) {
                 tabbedPane.remove(panel);
                 iconPanels.remove(index);
+                updateColors();
             }
 
             @Override
             public void mouseEntered(MouseEvent event) {
                 closeButton.setBackground(PALETTE.getRed());
+                iconPanel.setBackground(PALETTE.getMenuSelectBackground());
             }
 
             @Override
             public void mouseExited(MouseEvent event) {
                 closeButton.setBackground(PALETTE.getMenuSelectBackground());
+                iconPanel.setBackground(PALETTE.getUnselect());
             }
         });
 

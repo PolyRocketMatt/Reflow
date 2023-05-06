@@ -36,4 +36,6 @@ public abstract class FlowPalette {
 
     public abstract Color getStringTint();
 
+    public abstract Color getAnnotationStyle();
+
 }

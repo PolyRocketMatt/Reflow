@@ -15,9 +15,10 @@ public class ClassWrapper implements Wrapper {
 
     private final String className;
     private final String simpleName;
+    private final byte[] data;
     private final boolean isLibraryNode;
 
-    public ClassWrapper(@NotNull ClassNode node, @NotNull Set<String> imports, boolean isLibraryNode) {
+    public ClassWrapper(@NotNull ClassNode node, @NotNull Set<String> imports, byte[] data, boolean isLibraryNode) {
         this.node = node;
         this.imports = imports;
         this.methodWrappers = node.methods
@@ -28,6 +29,7 @@ public class ClassWrapper implements Wrapper {
                 .stream()
                 .map(FieldWrapper::new)
                 .collect(Collectors.toSet());
+        this.data = data;
         this.isLibraryNode = isLibraryNode;
         this.className = node.name;
 
@@ -35,11 +37,12 @@ public class ClassWrapper implements Wrapper {
         this.simpleName = split[split.length - 1];
     }
 
-    public ClassWrapper(@NotNull String name, @NotNull Set<String> imports, boolean isLibraryNode) {
+    public ClassWrapper(@NotNull String name, @NotNull Set<String> imports, byte[] data, boolean isLibraryNode) {
         this.node = null;
         this.imports = imports;
         this.methodWrappers = null;
         this.fieldWrappers = null;
+        this.data = data;
         this.isLibraryNode = isLibraryNode;
         this.className = name;
         this.simpleName = name;
@@ -67,6 +70,10 @@ public class ClassWrapper implements Wrapper {
 
     public String getSimpleName() {
         return simpleName;
+    }
+
+    public byte[] getData() {
+        return data;
     }
 
     public boolean isLibraryNode() {

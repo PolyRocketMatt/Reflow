@@ -1,6 +1,6 @@
 package com.github.polyrocketmatt.reflow.handler;
 
-import com.github.polyrocketmatt.reflow.asm.decompilation.DependencyDecompiler;
+import com.github.polyrocketmatt.reflow.asm.decompilation.asm.DependencyDecompiler;
 import com.github.polyrocketmatt.reflow.utils.ByteUtils;
 import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 import com.google.common.io.ByteStreams;
@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -52,7 +51,8 @@ public class ClassHandler {
                 if (name.endsWith(".class")) {
                     ClassNode classNode = ByteUtils.parseBytesToClassNode(data);
                     DependencyDecompiler dependencyDecompiler = ByteUtils.parseDependencies(data);
-                    ClassWrapper wrapper = new ClassWrapper(classNode, dependencyDecompiler.getImports(), false);
+                    Set<String> imports = filterDuplicateImports(dependencyDecompiler.getImports());
+                    ClassWrapper wrapper = new ClassWrapper(classNode, imports, data, false);
 
                     classes.put(wrapper, name);
                 } else {
@@ -79,4 +79,26 @@ public class ClassHandler {
     public Map<ClassWrapper, String> getClasses() {
         return classes;
     }
+
+    private Set<String> filterDuplicateImports(Set<String> imports) {
+        return imports;
+
+        /*
+        Set<String> types = new HashSet<>();
+        Set<String> filtered = new HashSet<>();
+
+        for (String imp : imports) {
+            String type = imp.substring(0, imp.lastIndexOf('.')).replace(" ", "");
+
+            if (!types.contains(type)) {
+                types.add(type);
+                filtered.add(imp);
+            }
+        }
+
+        return filtered;
+
+         */
+    }
+
 }

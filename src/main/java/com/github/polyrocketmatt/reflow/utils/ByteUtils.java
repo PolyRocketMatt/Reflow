@@ -1,6 +1,6 @@
 package com.github.polyrocketmatt.reflow.utils;
 
-import com.github.polyrocketmatt.reflow.asm.decompilation.DependencyDecompiler;
+import com.github.polyrocketmatt.reflow.asm.decompilation.asm.DependencyDecompiler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
