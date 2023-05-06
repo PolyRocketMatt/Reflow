@@ -16,7 +16,7 @@ import java.util.Set;
 
 import static org.objectweb.asm.Opcodes.ASM9;
 
-public class DependencyDecompiler extends ClassVisitor implements Decompiler {
+public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler {
 
     private final Set<String> packages;
     private final Set<String> imports;
@@ -28,7 +28,7 @@ public class DependencyDecompiler extends ClassVisitor implements Decompiler {
     private final FieldDecompiler fieldVisitor;
     private final AnnotationDecompiler annotationVisitor;
 
-    public DependencyDecompiler() {
+    public AsmDependencyDecompiler() {
         super(ASM9);
 
         this.packages = new HashSet<>();
@@ -163,10 +163,10 @@ public class DependencyDecompiler extends ClassVisitor implements Decompiler {
 
     private static class MethodDecompiler extends MethodVisitor {
 
-        private final DependencyDecompiler decompiler;
+        private final AsmDependencyDecompiler decompiler;
         private final AnnotationVisitor annotationVisitor;
 
-        public MethodDecompiler(int api, DependencyDecompiler decompiler) {
+        public MethodDecompiler(int api, AsmDependencyDecompiler decompiler) {
             super(api);
             this.decompiler = decompiler;
             this.annotationVisitor = new AnnotationDecompiler(api);

@@ -11,6 +11,7 @@ import java.util.Set;
 
 public class FlowStylePane implements FlowComponent {
 
+    private final JScrollPane scrollPane;
     private final JTextPane pane;
     private final StyledDocument document;
     private final Set<String> types;
@@ -33,11 +34,13 @@ public class FlowStylePane implements FlowComponent {
         this.pane.setEditable(false);
         this.pane.setFont(new Font("Consolas", Font.PLAIN, 12));
         this.pane.setMargin(new Insets(5, 5, 5, 5));
+        this.scrollPane = new JScrollPane(pane);
+        this.scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
     }
 
     @Override
-    public JTextPane getComponent() {
-        return pane;
+    public JScrollPane getComponent() {
+        return scrollPane;
     }
 
     @Override
@@ -47,6 +50,11 @@ public class FlowStylePane implements FlowComponent {
 
     public void insert(String part, Style style) {
         try { document.insertString(document.getLength(), part, style); }
+        catch (BadLocationException exception) { exception.printStackTrace(); }
+    }
+
+    public void insert(String part) {
+        try { document.insertString(document.getLength(), part, null); }
         catch (BadLocationException exception) { exception.printStackTrace(); }
     }
 

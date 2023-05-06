@@ -2,15 +2,34 @@ package com.github.polyrocketmatt.reflow.gui.component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
 
 public class FlowTab implements FlowComponent {
 
     private final String tabName;
     private final JPanel panel;
+    private final JPanel tabComponent;
 
-    public FlowTab(String tabName) {
+    public FlowTab(String tabName, JPanel panel, JPanel tabComponent) {
         this.tabName = tabName;
-        this.panel = new JPanel(new BorderLayout());
+        this.panel = panel;
+        this.tabComponent = tabComponent;
+        this.panel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent event) {
+                //  Set the background of the component to selected
+                tabComponent.setBackground(PALETTE.getMenuSelectBackground());
+            }
+
+            @Override
+            public void mouseExited(MouseEvent event) {
+                //  Set the background of the component to unselected
+                tabComponent.setBackground(PALETTE.getUnselect());
+            }
+        });
     }
 
     @Override
@@ -26,4 +45,9 @@ public class FlowTab implements FlowComponent {
     public String getTabName() {
         return tabName;
     }
+
+    public Component getTabComponent() {
+        return tabComponent;
+    }
+
 }

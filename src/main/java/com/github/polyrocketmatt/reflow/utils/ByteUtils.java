@@ -1,6 +1,6 @@
 package com.github.polyrocketmatt.reflow.utils;
 
-import com.github.polyrocketmatt.reflow.asm.decompilation.asm.DependencyDecompiler;
+import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmDependencyDecompiler;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
@@ -16,9 +16,9 @@ public class ByteUtils {
         return node;
     }
 
-    public static DependencyDecompiler parseDependencies(byte[] bytes) {
+    public static AsmDependencyDecompiler parseDependencies(byte[] bytes) {
         ClassReader reader = new ClassReader(bytes);
-        DependencyDecompiler decompiler = new DependencyDecompiler();
+        AsmDependencyDecompiler decompiler = new AsmDependencyDecompiler();
 
         reader.accept(decompiler, 0);
 

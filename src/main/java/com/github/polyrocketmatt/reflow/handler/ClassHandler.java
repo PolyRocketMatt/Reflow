@@ -1,6 +1,6 @@
 package com.github.polyrocketmatt.reflow.handler;
 
-import com.github.polyrocketmatt.reflow.asm.decompilation.asm.DependencyDecompiler;
+import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmDependencyDecompiler;
 import com.github.polyrocketmatt.reflow.utils.ByteUtils;
 import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 import com.google.common.io.ByteStreams;
@@ -21,14 +21,14 @@ public class ClassHandler {
 
     private final File file;
     private final Map<ClassWrapper, String> classes;
-    private final Set<ClassWrapper> internalClasses;
+    private final Map<String, Set<ClassWrapper>> innerClassMap;
     private final Map<String, byte[]> resources;
     private final Logger logger;
 
     public ClassHandler(File file) {
         this.file = file;
         this.classes = new HashMap<>();
-        this.internalClasses = new HashSet<>();
+        this.innerClassMap = new HashMap<>();
         this.resources = new HashMap<>();
         this.logger = LoggerFactory.getLogger("ClassHandler");
 
@@ -50,10 +50,20 @@ public class ClassHandler {
 
                 if (name.endsWith(".class")) {
                     ClassNode classNode = ByteUtils.parseBytesToClassNode(data);
-                    DependencyDecompiler dependencyDecompiler = ByteUtils.parseDependencies(data);
+                    AsmDependencyDecompiler dependencyDecompiler = ByteUtils.parseDependencies(data);
                     Set<String> imports = filterDuplicateImports(dependencyDecompiler.getImports());
                     ClassWrapper wrapper = new ClassWrapper(classNode, imports, data, false);
+                    boolean isInnerClass = classNode.name.contains("$");
 
+                    //  If this class is an inner class, we don't want to add it to the list of classes
+                    if (isInnerClass) {
+                        String key = wrapper.getSimpleName().substring(0, wrapper.getSimpleName().indexOf("$"));
+                        Set<ClassWrapper> wrappers = innerClassMap.getOrDefault(key, new HashSet<>());
+                        wrappers.add(wrapper);
+                        innerClassMap.put(key, wrappers);
+
+                        continue;
+                    }
                     classes.put(wrapper, name);
                 } else {
                     if (name.equals("META-INF/MANIFEST.MF")) {
@@ -63,7 +73,7 @@ public class ClassHandler {
                         manifest = manifest.substring(0, manifest.length() - 2);
 
                         // Place a watermark
-                        manifest += "Obfuscated-By: FlowFuscate-0.0.1\r\n";
+                        manifest += "Obfuscated-By: ReFlow-0.0.1\r\n";
 
                         data = manifest.getBytes();
                     }
@@ -74,31 +84,30 @@ public class ClassHandler {
         }
 
         logger.info("Loaded {} classes!", classes.size());
+
+        //  Update inner classes
+        for (ClassWrapper wrapper : classes.keySet()) {
+            String key = wrapper.getSimpleName();
+            Set<ClassWrapper> wrappers = innerClassMap.getOrDefault(key, new HashSet<>());
+
+            wrapper.updateInnerClasses(wrappers);
+        }
     }
 
     public Map<ClassWrapper, String> getClasses() {
         return classes;
     }
 
+    public Map<String, Set<ClassWrapper>> getInnerClassMap() {
+        return innerClassMap;
+    }
+
+    public Set<ClassWrapper> getInnerClasses(String key) {
+        return innerClassMap.getOrDefault(key, new HashSet<>());
+    }
+
     private Set<String> filterDuplicateImports(Set<String> imports) {
         return imports;
-
-        /*
-        Set<String> types = new HashSet<>();
-        Set<String> filtered = new HashSet<>();
-
-        for (String imp : imports) {
-            String type = imp.substring(0, imp.lastIndexOf('.')).replace(" ", "");
-
-            if (!types.contains(type)) {
-                types.add(type);
-                filtered.add(imp);
-            }
-        }
-
-        return filtered;
-
-         */
     }
 
 }

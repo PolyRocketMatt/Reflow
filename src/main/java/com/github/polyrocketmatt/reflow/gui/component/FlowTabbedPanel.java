@@ -16,35 +16,41 @@ import static com.github.polyrocketmatt.reflow.gui.FlowConstants.DIM_17;
 
 public class FlowTabbedPanel implements FlowComponent {
 
-    private final JTabbedPane pane;
+    private final JTabbedPane tabPane;
     private final List<FlowTab> tabs;
     private final Map<Integer, JPanel> iconPanels;
     private final boolean isCloseable;
 
     public FlowTabbedPanel(boolean isCloseable) {
-        this.pane = new JTabbedPane();
+        this.tabPane = new JTabbedPane();
         this.tabs = new ArrayList<>();
         this.iconPanels = new HashMap<>();
         this.isCloseable = isCloseable;
     }
 
-    public void add(FlowTab tab) {
+    public FlowTab add(String name) {
+        int tabIndex = tabPane.getTabCount();
+        JPanel panel = new JPanel(new BorderLayout());
+        FlowTab tab = new FlowTab(name, panel, getIconPanel(panel, name, tabIndex));
+
         tabs.add(tab);
-        pane.addTab(tab.getTabName(), tab.getComponent());
+        tabPane.addTab(tab.getTabName(), tab.getComponent());
 
         if (isCloseable)
-            pane.setTabComponentAt(pane.getTabCount() - 1, getIconPanel(pane, tab.getComponent(), tab.getTabName(), pane.getTabCount() - 1));
+            tabPane.setTabComponentAt(tabPane.getTabCount() - 1, tab.getTabComponent());
+
+        return tab;
     }
 
     @Override
     public JTabbedPane getComponent() {
-        return pane;
+        return tabPane;
     }
 
     @Override
     public void setVisibile(boolean visibility) {
         tabs.forEach(tab -> tab.setVisibile(visibility));
-        pane.setVisible(visibility);
+        tabPane.setVisible(visibility);
     }
 
     public List<FlowTab> getTabs() {
@@ -75,25 +81,25 @@ public class FlowTabbedPanel implements FlowComponent {
     public void setSelectedTab(int index) {
         if (index < 0 || index >= tabs.size())
             throw new IllegalArgumentException("Invalid tab index");
-        pane.setSelectedIndex(index);
+        tabPane.setSelectedIndex(index);
     }
 
     public void setSelectedTab(FlowTab tab) {
-        pane.setSelectedComponent(tab.getComponent());
+        tabPane.setSelectedComponent(tab.getComponent());
         updateColors();
     }
 
     public FlowTab getSelectedTab() {
-        return tabs.get(pane.getSelectedIndex());
+        return tabs.get(tabPane.getSelectedIndex());
     }
 
     public void updateColors() {
-        int selectedIndex = pane.getSelectedIndex();
+        int selectedIndex = tabPane.getSelectedIndex();
         for (Map.Entry<Integer, JPanel> iconPanelEntry : iconPanels.entrySet())
             iconPanelEntry.getValue().setBackground(selectedIndex == iconPanelEntry.getKey() ? PALETTE.getMenuSelectBackground() : PALETTE.getUnselect());
     }
 
-    private JPanel getIconPanel(JTabbedPane tabbedPane, JPanel panel, String title, int index) {
+    private JPanel getIconPanel(JPanel panel, String title, int index) {
         JPanel iconPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         JLabel iconLabel = new JLabel(title);
 
@@ -106,9 +112,12 @@ public class FlowTabbedPanel implements FlowComponent {
         closeButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent event) {
-                tabbedPane.remove(panel);
+                tabPane.remove(panel);
+                tabs.remove(index);
                 iconPanels.remove(index);
                 updateColors();
+
+                System.out.println(tabPane.getTabCount());
             }
 
             @Override
@@ -130,7 +139,7 @@ public class FlowTabbedPanel implements FlowComponent {
 
             @Override
             public void mouseClicked(MouseEvent event) {
-                tabbedPane.setSelectedComponent(panel);
+                tabPane.setSelectedComponent(panel);
                 iconPanel.setBackground(PALETTE.getMenuSelectBackground());
             }
 
@@ -141,7 +150,7 @@ public class FlowTabbedPanel implements FlowComponent {
 
             @Override
             public void mouseExited(MouseEvent event) {
-                if (!tabbedPane.getSelectedComponent().equals(panel))
+                if (!tabPane.getSelectedComponent().equals(panel))
                     iconPanel.setBackground(PALETTE.getUnselect());
             }
         });

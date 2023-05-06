@@ -3,6 +3,7 @@ package com.github.polyrocketmatt.reflow.asm.wrapper;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.tree.ClassNode;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ public class ClassWrapper implements Wrapper {
     private final Set<String> imports;
     private final Set<MethodWrapper> methodWrappers;
     private final Set<FieldWrapper> fieldWrappers;
+    private final Set<ClassWrapper> innerClasses;
 
     private final String className;
     private final String simpleName;
@@ -29,6 +31,7 @@ public class ClassWrapper implements Wrapper {
                 .stream()
                 .map(FieldWrapper::new)
                 .collect(Collectors.toSet());
+        this.innerClasses = new HashSet<>();
         this.data = data;
         this.isLibraryNode = isLibraryNode;
         this.className = node.name;
@@ -42,6 +45,7 @@ public class ClassWrapper implements Wrapper {
         this.imports = imports;
         this.methodWrappers = null;
         this.fieldWrappers = null;
+        this.innerClasses = null;
         this.data = data;
         this.isLibraryNode = isLibraryNode;
         this.className = name;
@@ -62,6 +66,15 @@ public class ClassWrapper implements Wrapper {
 
     public Set<FieldWrapper> getFieldWrappers() {
         return fieldWrappers;
+    }
+
+    public Set<ClassWrapper> getInnerClasses() {
+        return innerClasses;
+    }
+
+    public void updateInnerClasses(Set<ClassWrapper> innerClasses) {
+        this.innerClasses.clear();
+        this.innerClasses.addAll(innerClasses);
     }
 
     public String getClassName() {

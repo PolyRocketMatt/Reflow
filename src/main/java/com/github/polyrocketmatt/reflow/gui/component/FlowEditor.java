@@ -21,23 +21,23 @@ public class FlowEditor implements FlowComponent {
         this.pipelinePanel.setLayout(new BoxLayout(pipelinePanel, BoxLayout.Y_AXIS));
         this.logPanel.setLayout(new BoxLayout(logPanel, BoxLayout.Y_AXIS));
         this.panel.setDividerSize(0);
-        this.panel.setDividerLocation(height - 500);
+        this.panel.setDividerLocation(height - 300);
 
         //  Initialize pipeline panel
         this.pipeline = new FlowTabbedPanel(false);
         this.pipelinePanel.add(pipeline.getComponent());
 
         //  Pipeline panels
-        this.pipeline.add(new FlowTab("Input"));
-        this.pipeline.add(new FlowTab("Flow Obfuscation"));
-        this.pipeline.add(new FlowTab("Output"));
+        this.pipeline.add("Input");
+        this.pipeline.add("Flow Obfuscation");
+        this.pipeline.add("Output");
 
         //  Initialize log panel
         this.log = new FlowTabbedPanel(false);
         this.logPanel.add(log.getComponent());
 
         //  Log panels
-        this.log.add(new FlowTab("Log"));
+        this.log.add("Log");
     }
 
     @Override

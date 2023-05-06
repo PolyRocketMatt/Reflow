@@ -1,6 +1,6 @@
 package com.github.polyrocketmatt.reflow.gui.component;
 
-import com.github.polyrocketmatt.reflow.asm.decompilation.visitor.ClassFileDecompiler;
+import com.github.polyrocketmatt.reflow.asm.decompilation.custom.ClassFileDecompiler;
 import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 
 import javax.swing.*;
@@ -49,7 +49,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
     }
 
     @Override
-    public JTextPane getComponent() {
+    public JScrollPane getComponent() {
         return stylePane.getComponent();
     }
 
@@ -171,7 +171,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
     }
 
     private void parseClass() {
-        ClassFileDecompiler decompiler = new ClassFileDecompiler(source, wrapper, stylePane);
+        ClassFileDecompiler decompiler = new ClassFileDecompiler(source, wrapper, stylePane, "");
     }
 
     /*
@@ -278,7 +278,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
             "long",
             "native", "new",
             "package", "private", "protected", "public",
-            "return",
+            "record", "return",
             "short", "static", "strictfp", "super", "switch", "synchronized",
             "this", "throw", "throws", "transient", "try",
             "var", "void", "volatile",

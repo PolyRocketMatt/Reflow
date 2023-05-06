@@ -20,7 +20,7 @@ public class LightFlowPalette extends FlowPalette {
     private static final Color LITERAL = new Color(Integer.parseInt("3891A6", 16));
     private static final Color TYPE = new Color(Integer.parseInt("CC5A71", 16));
     private static final Color STRING = new Color(Integer.parseInt("659B5E", 16));
-    private static final Color ANNOTATION = new Color(Integer.parseInt("444444", 16));
+    private static final Color ANNOTATION = new Color(Integer.parseInt("A2A2A2", 16));
 
     public LightFlowPalette() {
         super();

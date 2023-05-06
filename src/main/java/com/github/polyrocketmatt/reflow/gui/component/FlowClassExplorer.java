@@ -166,20 +166,17 @@ public class FlowClassExplorer implements FlowComponent {
         //  Check if the file exists
         String absolutePath = selectedFile.getAbsolutePath();
 
-        //  Get the plain text of the selected file
-        String plainText = "";
-
         //  Decompile
         JDecompiler decompiler = new JDecompiler(absolutePath);
         String decompiledSource = decompiler.getDecompiledSource();
 
         //  Create syntax-highlighted text area
         FlowSyntaxHighlightedTextView decompiledTextPane = new FlowSyntaxHighlightedTextView(wrapper, decompiledSource);
-        FlowTab decompiledTab = new FlowTab(className);
 
         //  Finally, we add the tab to the tabbed pane and set it as the selected tab
+        FlowTab decompiledTab = decompiledTabs.add(className);
+
         decompiledTab.getComponent().add(decompiledTextPane.getComponent(), BorderLayout.CENTER);
-        decompiledTabs.add(decompiledTab);
         decompiledTabs.setSelectedTab(decompiledTab);
     }
 
