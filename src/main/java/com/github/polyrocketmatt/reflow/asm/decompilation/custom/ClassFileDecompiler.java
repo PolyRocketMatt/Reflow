@@ -1,17 +1,19 @@
 package com.github.polyrocketmatt.reflow.asm.decompilation.custom;
 
 import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmAnnotationDecompiler;
-import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmLocalVarDecompiler;
+import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmMethodDecompiler;
 import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 import com.github.polyrocketmatt.reflow.gui.component.FlowStylePane;
 import com.github.polyrocketmatt.reflow.utils.AccessUtils;
 import com.github.polyrocketmatt.reflow.utils.types.Pair;
+import org.checkerframework.checker.units.qual.A;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.LocalVariableNode;
 
+import javax.swing.text.Style;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -25,7 +27,6 @@ public class ClassFileDecompiler extends ClassVisitor {
     private final FlowStylePane pane;
     private final String offset;
     private final AsmAnnotationDecompiler annotationDecompiler = new AsmAnnotationDecompiler();
-    private final AsmLocalVarDecompiler localVarDecompiler = new AsmLocalVarDecompiler();
     private final List<ConstructorInformation> constructors = new ArrayList<>();
     private final List<MethodInformation> methods = new ArrayList<>();
 
@@ -78,12 +79,14 @@ public class ClassFileDecompiler extends ClassVisitor {
         //      Insert annotations
         reader.accept(annotationDecompiler, 0);
         annotationDecompiler.getAnnotationInformations().forEach(info -> {
+            String annotationName = info.name().substring(info.name().lastIndexOf('$') + 1);
+
             //  Create annotation heading
             pane.insert(offset);
-            pane.insert("@" + info.name(), pane.getAnnotationStyle());
+            pane.insert("@" + annotationName, pane.getAnnotationStyle(info.name()));
 
             if (!info.values().isEmpty()) {
-                pane.insert("(", pane.getAnnotationStyle());
+                pane.insert("(", pane.getExternalAnnotationStyle());
 
                 //  Insert annotation values
                 int index = 0;
@@ -100,7 +103,7 @@ public class ClassFileDecompiler extends ClassVisitor {
                     if (isArray) {
                         List<?> objects = (List<?>) value.second();
 
-                        pane.insert("{", pane.getAnnotationStyle());
+                        pane.insert("{", pane.getExternalAnnotationStyle());
 
                         int listIndex = 0;
                         for (Object object : objects) {
@@ -119,7 +122,7 @@ public class ClassFileDecompiler extends ClassVisitor {
                             listIndex++;
                         }
 
-                        pane.insert("}", pane.getAnnotationStyle());
+                        pane.insert("}", pane.getExternalAnnotationStyle());
                     } else {
                         if (isString)
                             pane.insert("\"" + value.second().toString() + "\"", pane.getStringLiteralStyle());
@@ -136,7 +139,7 @@ public class ClassFileDecompiler extends ClassVisitor {
                     index++;
                 }
 
-                pane.insert(")", pane.getAnnotationStyle());
+                pane.insert(")", pane.getExternalAnnotationStyle());
             }
 
             pane.insert("\n");
@@ -162,11 +165,11 @@ public class ClassFileDecompiler extends ClassVisitor {
         pane.insert(separator(abstractModifier));
 
         //      Insert class type
-        pane.insert(classType, isAnnotation ? pane.getAnnotationStyle() : pane.getKeywordStyle());
+        pane.insert(classType, isAnnotation ? pane.getAnnotationStyle(classType) : pane.getKeywordStyle());
         pane.insert(" ");
 
-        //      Insert class name
-        pane.insert(className, pane.getInternalTypeStyle());
+        //      Insert class name (always external, since this is the current class we don't want to make an infinite loop)
+        pane.insert(className, pane.getExternalTypeStyle());
         pane.insert(" ");
 
         //      Insert super class
@@ -261,10 +264,12 @@ public class ClassFileDecompiler extends ClassVisitor {
                     .substring(wrapper.getSimpleName().lastIndexOf('$') + 1);
             final List<Pair<String, String>> parameters = new ArrayList<>();
             final Type[] argumentTypes = Type.getArgumentTypes(descriptor);
-            MethodVisitor visitor = new MethodVisitor(ASM_VERSION, localVarDecompiler) {
+
+            AsmMethodDecompiler constructorDecompiler = new AsmMethodDecompiler();
+            MethodVisitor visitor = new MethodVisitor(ASM_VERSION, constructorDecompiler) {
                 @Override
                 public void visitEnd() {
-                    List<LocalVariableNode> localVariables = localVarDecompiler.getLocalVariables();
+                    List<LocalVariableNode> localVariables = constructorDecompiler.getLocalVariables();
                     if (localVariables != null)
                         for (int i = 0; i < argumentTypes.length; i++) {
                             String parameterType = argumentTypes[i].getClassName().substring(argumentTypes[i].getClassName().lastIndexOf('.') + 1);
@@ -272,6 +277,7 @@ public class ClassFileDecompiler extends ClassVisitor {
 
                             parameters.add(new Pair<>(parameterType, parameterName));
                         }
+
                     super.visitEnd();
                 }
             };
@@ -294,14 +300,16 @@ public class ClassFileDecompiler extends ClassVisitor {
             String returnType = Type.getReturnType(descriptor).getClassName().substring(Type.getReturnType(descriptor).getClassName().lastIndexOf('.') + 1);
             final List<Pair<String, String>> parameters = new ArrayList<>();
             final Type[] argumentTypes = Type.getArgumentTypes(descriptor);
-            MethodVisitor visitor = new MethodVisitor(ASM_VERSION, localVarDecompiler) {
+
+            AsmMethodDecompiler methodDecompiler = new AsmMethodDecompiler();
+            MethodVisitor visitor = new MethodVisitor(ASM_VERSION, methodDecompiler) {
                 @Override
                 public void visitEnd() {
-                    List<LocalVariableNode> localVariables = localVarDecompiler.getLocalVariables();
+                    List<LocalVariableNode> localVariables = methodDecompiler.getLocalVariables();
                     if (localVariables != null)
                         for (int i = 0; i < argumentTypes.length; i++) {
                             String parameterType = argumentTypes[i].getClassName().substring(argumentTypes[i].getClassName().lastIndexOf('.') + 1);
-                            String parameterName = localVariables.get(i + 1).name;
+                            String parameterName = localVariables.get(i).name;
 
                             parameters.add(new Pair<>(parameterType, parameterName));
                         }

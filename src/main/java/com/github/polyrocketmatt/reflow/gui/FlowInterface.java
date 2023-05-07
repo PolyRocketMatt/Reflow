@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.polyrocketmatt.reflow.ReFlow.CLASS_HANDLER;
+
 public class FlowInterface extends JFrame {
 
     private final FlowInterfaceManager manager;
@@ -143,7 +145,7 @@ public class FlowInterface extends JFrame {
         //  Create the flow editor
         FlowEditor flowEditor = new FlowEditor(getNextIndex(), getWidth(), getHeight());
         FlowTab inputTab = flowEditor.getPipeline().getTabByIndex(0);
-        FlowClassExplorer explorer = new FlowClassExplorer(actions.getCurrentFile().getName(), actions.getCurrentClassHandler().getClasses().keySet());
+        FlowClassExplorer explorer = new FlowClassExplorer(actions.getCurrentFile().getName(), CLASS_HANDLER.getClasses().keySet());
 
         //  Add class exploration to the input tab
         inputTab.getComponent().add(explorer.getComponent());

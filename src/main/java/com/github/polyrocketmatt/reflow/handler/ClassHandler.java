@@ -19,13 +19,17 @@ import java.util.zip.ZipInputStream;
 
 public class ClassHandler {
 
-    private final File file;
-    private final Map<ClassWrapper, String> classes;
-    private final Map<String, Set<ClassWrapper>> innerClassMap;
-    private final Map<String, byte[]> resources;
-    private final Logger logger;
+    public static final ClassHandler INSTANCE = new ClassHandler();
 
-    public ClassHandler(File file) {
+    private File file;
+    private Map<ClassWrapper, String> classes;
+    private Map<String, Set<ClassWrapper>> innerClassMap;
+    private Map<String, byte[]> resources;
+    private Logger logger;
+
+    protected ClassHandler() {}
+
+    public void init(File file) {
         this.file = file;
         this.classes = new HashMap<>();
         this.innerClassMap = new HashMap<>();
@@ -52,7 +56,7 @@ public class ClassHandler {
                 if (name.endsWith(".class")) {
                     ClassNode classNode = ByteUtils.parseBytesToClassNode(data);
                     AsmDependencyDecompiler dependencyDecompiler = ByteUtils.parseDependencies(data);
-                    Set<String> imports = filterDuplicateImports(dependencyDecompiler.getImports());
+                    Set<String> imports = dependencyDecompiler.getImports();
                     ClassWrapper wrapper = new ClassWrapper(classNode, imports, data, false);
                     boolean isInnerClass = classNode.name.contains("$");
 
@@ -111,10 +115,6 @@ public class ClassHandler {
 
     public Set<ClassWrapper> getInnerClasses(String key) {
         return innerClassMap.getOrDefault(key, new HashSet<>());
-    }
-
-    private Set<String> filterDuplicateImports(Set<String> imports) {
-        return imports;
     }
 
 }

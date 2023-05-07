@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
+import static com.github.polyrocketmatt.reflow.ReFlow.CLASS_HANDLER;
 import static com.github.polyrocketmatt.reflow.ReFlow.TEMP_DIR;
 
 public class FlowActions {
@@ -17,7 +18,6 @@ public class FlowActions {
     private final Logger logger = LoggerFactory.getLogger("FlowActions");
 
     private File currentFile;
-    private ClassHandler currentClassHandler;
 
     public FlowActions(FlowInterface flowInterface) {
         this.flowInterface = flowInterface;
@@ -27,9 +27,6 @@ public class FlowActions {
         return currentFile;
     }
 
-    public ClassHandler getCurrentClassHandler() {
-        return currentClassHandler;
-    }
 
     public void openFileAction(ActionEvent event) {
         //  Create file chooser dialog
@@ -53,14 +50,12 @@ public class FlowActions {
     }
 
     public void initializeClassTree() {
-        currentClassHandler = null;
-
         try {
             //  Create class handler
-            currentClassHandler = new ClassHandler(currentFile);
+            CLASS_HANDLER.init(currentFile);
 
             //  Extract classes from JAR and store in temp directory
-            JExtractor.extractClasses(currentFile, TEMP_DIR, currentClassHandler.getClasses().keySet());
+            JExtractor.extractClasses(currentFile, TEMP_DIR, CLASS_HANDLER.getClasses().keySet());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -37,4 +37,14 @@ public class ByteUtils {
         return new String(bytes);
     }
 
+    public static boolean bytesMatch(byte[] first, byte[] second) {
+        if (first.length != second.length)
+            return false;
+
+        for (int i = 0; i < first.length; i++)
+            if (first[i] != second[i])
+                return false;
+        return true;
+    }
+
 }

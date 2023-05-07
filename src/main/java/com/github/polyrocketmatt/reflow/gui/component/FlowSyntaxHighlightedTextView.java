@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.github.polyrocketmatt.reflow.ReFlow.CLASS_HANDLER;
 import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
 
 public class FlowSyntaxHighlightedTextView implements FlowComponent {
@@ -20,6 +21,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
     private final String source;
     private final ClassWrapper wrapper;
     private final Set<String> types;
+    private final Set<String> internalTypes;
     private final FlowStylePane stylePane;
 
     public FlowSyntaxHighlightedTextView(ClassWrapper wrapper, String source) {
@@ -27,7 +29,8 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         this.wrapper = wrapper;
 
         this.types = parseTypes();
-        this.stylePane = new FlowStylePane(types);
+        this.internalTypes = parseInternalTypes();
+        this.stylePane = new FlowStylePane(types, internalTypes);
 
         //  Keywords
         StyleConstants.setForeground(stylePane.getKeywordStyle(), PALETTE.getKeywordTint());
@@ -38,19 +41,19 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         //  Types
         StyleConstants.setForeground(stylePane.getInternalTypeStyle(), PALETTE.getTypeTint());
         StyleConstants.setForeground(stylePane.getExternalTypeStyle(), PALETTE.getTypeTint());
-        StyleConstants.setUnderline(stylePane.getExternalTypeStyle(), true);
+        StyleConstants.setUnderline(stylePane.getInternalTypeStyle(), true);
 
         //  Strings
         StyleConstants.setForeground(stylePane.getStringLiteralStyle(), PALETTE.getStringTint());
 
         //  Annotations
-        StyleConstants.setForeground(stylePane.getAnnotationStyle(), PALETTE.getAnnotationStyle());
+        StyleConstants.setForeground(stylePane.getInternalAnnotationStyle(), PALETTE.getAnnotationStyle());
+        StyleConstants.setForeground(stylePane.getExternalAnnotationStyle(), PALETTE.getAnnotationStyle());
+        StyleConstants.setUnderline(stylePane.getInternalAnnotationStyle(), true);
 
         parsePackage();
         parseImports();
         parseClass();
-
-        types.forEach(System.out::println);
     }
 
     @Override
@@ -70,6 +73,14 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
 
     private Set<String> parseTypes() {
         return wrapper.getImports().stream().map(dependency -> dependency.substring(dependency.lastIndexOf(".") + 1)).collect(Collectors.toSet());
+    }
+
+    private Set<String> parseInternalTypes() {
+        return CLASS_HANDLER.getClasses()
+                .keySet()
+                .stream()
+                .map(ClassWrapper::getSimpleName)
+                .collect(Collectors.toSet());
     }
 
     private void parsePackage() {

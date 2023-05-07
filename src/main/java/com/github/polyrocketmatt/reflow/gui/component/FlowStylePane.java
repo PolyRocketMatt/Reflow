@@ -1,12 +1,13 @@
 package com.github.polyrocketmatt.reflow.gui.component;
 
+import com.github.polyrocketmatt.reflow.utils.ByteUtils;
+
 import javax.swing.*;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 public class FlowStylePane implements FlowComponent {
@@ -15,29 +16,48 @@ public class FlowStylePane implements FlowComponent {
     private final JTextPane pane;
     private final StyledDocument document;
     private final Set<String> types;
+    private final Set<String> internalTypes;
     private Style keywordStyle;
     private Style literalStyle;
     private Style internalTypeStyle;
     private Style externalTypeStyle;
     private Style stringLiteralStyle;
-    private Style annotationStyle;
+    private Style internalAnnotationStyle;
+    private Style externalAnnotationStyle;
 
-    public FlowStylePane(Set<String> types) {
+    // Create a custom hand cursor
+    private final Cursor cursor;
+
+    public FlowStylePane(Set<String> types, Set<String> internalTypes) {
         this.pane = new JTextPane();
         this.document = pane.getStyledDocument();
         this.types = types;
+        this.internalTypes = internalTypes;
         this.keywordStyle = document.addStyle("keyword", null);
         this.literalStyle = document.addStyle("literal", null);
         this.internalTypeStyle = document.addStyle("internalType", null);
         this.externalTypeStyle = document.addStyle("externalType", null);
         this.stringLiteralStyle = document.addStyle("stringLiteral", null);
-        this.annotationStyle = document.addStyle("annotation", null);
+        this.internalAnnotationStyle = document.addStyle("internalAnnotation", null);
+        this.externalAnnotationStyle = document.addStyle("externalAnnotation", null);
+        this.cursor = new Cursor(Cursor.HAND_CURSOR);
 
         this.pane.setEditable(false);
         this.pane.setFont(new Font("Consolas", Font.PLAIN, 12));
         this.pane.setMargin(new Insets(5, 5, 5, 5));
         this.scrollPane = new JScrollPane(pane);
         this.scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+        // Add a hyperlink listener to the text pane
+        this.pane.addHyperlinkListener(event -> {
+            if (event.getEventType() == HyperlinkEvent.EventType.ENTERED)
+                pane.setCursor(cursor);
+            else if (event.getEventType() == HyperlinkEvent.EventType.EXITED)
+                pane.setCursor(Cursor.getDefaultCursor());
+            else {
+                System.out.println(event.getDescription());
+            }
+        });
     }
 
     @Override
@@ -84,12 +104,23 @@ public class FlowStylePane implements FlowComponent {
         return stringLiteralStyle;
     }
 
-    public Style getAnnotationStyle() {
-        return annotationStyle;
+    public Style getInternalAnnotationStyle() {
+        return internalAnnotationStyle;
+    }
+
+    public Style getExternalAnnotationStyle() {
+        return externalAnnotationStyle;
+    }
+
+    public Style getAnnotationStyle(String annotation) {
+        boolean isInternal = internalTypes.stream().anyMatch(iType -> ByteUtils.bytesMatch(iType.getBytes(), annotation.getBytes()));
+
+        return isInternal ? internalAnnotationStyle : externalAnnotationStyle;
     }
 
     public Style getTypeStyle(String type) {
-        return (types.contains(type)) ? internalTypeStyle : externalTypeStyle;
+        boolean isInternal = internalTypes.stream().anyMatch(iType -> ByteUtils.bytesMatch(iType.getBytes(), type.getBytes()));
+        return isInternal ? internalTypeStyle : externalTypeStyle;
     }
 
 }
