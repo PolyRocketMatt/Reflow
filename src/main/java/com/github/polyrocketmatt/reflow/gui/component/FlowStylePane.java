@@ -17,7 +17,8 @@ public class FlowStylePane implements FlowComponent {
     private final Set<String> types;
     private Style keywordStyle;
     private Style literalStyle;
-    private Style typeStyle;
+    private Style internalTypeStyle;
+    private Style externalTypeStyle;
     private Style stringLiteralStyle;
     private Style annotationStyle;
 
@@ -27,7 +28,8 @@ public class FlowStylePane implements FlowComponent {
         this.types = types;
         this.keywordStyle = document.addStyle("keyword", null);
         this.literalStyle = document.addStyle("literal", null);
-        this.typeStyle = document.addStyle("type", null);
+        this.internalTypeStyle = document.addStyle("internalType", null);
+        this.externalTypeStyle = document.addStyle("externalType", null);
         this.stringLiteralStyle = document.addStyle("stringLiteral", null);
         this.annotationStyle = document.addStyle("annotation", null);
 
@@ -70,8 +72,12 @@ public class FlowStylePane implements FlowComponent {
         return literalStyle;
     }
 
-    public Style getTypeStyle() {
-        return typeStyle;
+    public Style getInternalTypeStyle() {
+        return internalTypeStyle;
+    }
+
+    public Style getExternalTypeStyle() {
+        return externalTypeStyle;
     }
 
     public Style getStringLiteralStyle() {
@@ -81,4 +87,9 @@ public class FlowStylePane implements FlowComponent {
     public Style getAnnotationStyle() {
         return annotationStyle;
     }
+
+    public Style getTypeStyle(String type) {
+        return (types.contains(type)) ? internalTypeStyle : externalTypeStyle;
+    }
+
 }

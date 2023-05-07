@@ -71,7 +71,7 @@ public class ClassFileDecompiler extends ClassVisitor {
                 .stream()
                 .map(s -> s.replace('/', '.'))
                 .map(s -> s.substring(s.lastIndexOf('.') + 1))
-                .filter(s -> isAnnotation && !s.equals("Annotation"))
+                .filter(s -> isAnnotation && !s.equals("Annotation") && !s.equals("Object"))
                 .toList();
 
         //  Finally, we insert everything into the pane
@@ -166,14 +166,14 @@ public class ClassFileDecompiler extends ClassVisitor {
         pane.insert(" ");
 
         //      Insert class name
-        pane.insert(className, pane.getTypeStyle());
+        pane.insert(className, pane.getInternalTypeStyle());
         pane.insert(" ");
 
         //      Insert super class
         if (superClassName != null) {
             pane.insert("extends", pane.getKeywordStyle());
             pane.insert(" ");
-            pane.insert(superClassName, pane.getTypeStyle());
+            pane.insert(superClassName, pane.getTypeStyle(superClassName));
             pane.insert(" ");
         }
 
@@ -183,7 +183,9 @@ public class ClassFileDecompiler extends ClassVisitor {
             pane.insert(" ");
 
             for (int i = 0; i < interfaces.size(); i++) {
-                pane.insert(interfaces.get(i), pane.getTypeStyle());
+                String interfaceName = interfaces.get(i);
+
+                pane.insert(interfaceName, pane.getTypeStyle(interfaceName));
                 pane.insert(i == interfaces.size() - 1 ? " " : ", ");
             }
         }
@@ -200,7 +202,7 @@ public class ClassFileDecompiler extends ClassVisitor {
             pane.insert(innerOffset);
             pane.insert(constructor.accessModifier(), pane.getKeywordStyle());
             pane.insert(" ");
-            pane.insert(constructor.constructorName(), pane.getTypeStyle());
+            pane.insert(constructor.constructorName(), pane.getExternalTypeStyle());
 
             insertMethodSignature(parameters, exceptions);
 
@@ -223,9 +225,9 @@ public class ClassFileDecompiler extends ClassVisitor {
                 pane.insert(modifier, pane.getKeywordStyle());
                 pane.insert(" ");
             });
-            pane.insert(method.returnType(), pane.getTypeStyle());
+            pane.insert(method.returnType(), pane.getTypeStyle(method.returnType()));
             pane.insert(" ");
-            pane.insert(method.methodName(), pane.getTypeStyle());
+            pane.insert(method.methodName());
 
             insertMethodSignature(parameters, exceptions);
 
@@ -323,9 +325,12 @@ public class ClassFileDecompiler extends ClassVisitor {
         pane.insert("(");
 
         for (Pair<String, String> constructorParameter : parameters) {
-            pane.insert(constructorParameter.first(), pane.getTypeStyle());
+            String type = constructorParameter.first();
+            String name = constructorParameter.second();
+
+            pane.insert(type, pane.getTypeStyle(type));
             pane.insert(" ");
-            pane.insert(constructorParameter.second());
+            pane.insert(name);
 
             if (parameters.indexOf(constructorParameter) != parameters.size() - 1)
                 pane.insert(", ");
@@ -336,7 +341,7 @@ public class ClassFileDecompiler extends ClassVisitor {
         if (!exceptions.isEmpty()) {
             pane.insert(" throws ", pane.getKeywordStyle());
             for (String exception : exceptions) {
-                pane.insert(exception, pane.getTypeStyle());
+                pane.insert(exception, pane.getTypeStyle(exception));
                 pane.insert(" ");
             }
         } else

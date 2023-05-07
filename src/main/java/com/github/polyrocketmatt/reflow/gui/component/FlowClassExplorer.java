@@ -10,6 +10,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.io.File;
@@ -198,7 +199,7 @@ public class FlowClassExplorer implements FlowComponent {
                 children.forEach(node::remove);
 
                 //  First we find the children without children
-                java.util.List<MutableTreeNode> leafs = children.stream().filter(child -> child.getChildCount() == 0).toList();
+                List<MutableTreeNode> leafs = children.stream().filter(child -> child.getChildCount() == 0).toList();
                 List<MutableTreeNode> branches = children.stream().filter(child -> child.getChildCount() > 0).toList();
 
                 //  We first handle the branches
