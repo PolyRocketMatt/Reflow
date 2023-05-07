@@ -28,6 +28,34 @@ public class AccessUtils {
         return (access & Opcodes.ACC_FINAL) != 0;
     }
 
+    public static boolean isSynchronized(int access) {
+        return (access & Opcodes.ACC_SYNCHRONIZED) != 0;
+    }
+
+    public static boolean isNative(int access) {
+        return (access & Opcodes.ACC_NATIVE) != 0;
+    }
+
+    public static boolean isStrict(int access) {
+        return (access & Opcodes.ACC_STRICT) != 0;
+    }
+
+    public static boolean isBridge(int access) {
+        return (access & Opcodes.ACC_BRIDGE) != 0;
+    }
+
+    public static boolean isVarArgs(int access) {
+        return (access & Opcodes.ACC_VARARGS) != 0;
+    }
+
+    public static boolean isSynthetic(int access) {
+        return (access & Opcodes.ACC_SYNTHETIC) != 0;
+    }
+
+    public static boolean isMandated(int access) {
+        return (access & Opcodes.ACC_MANDATED) != 0;
+    }
+
     public static boolean isInterface(int access) {
         return (access & Opcodes.ACC_INTERFACE) != 0;
     }

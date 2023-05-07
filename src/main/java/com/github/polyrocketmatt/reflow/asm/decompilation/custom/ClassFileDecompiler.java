@@ -27,6 +27,7 @@ public class ClassFileDecompiler extends ClassVisitor {
     private final AsmAnnotationDecompiler annotationDecompiler = new AsmAnnotationDecompiler();
     private final AsmLocalVarDecompiler localVarDecompiler = new AsmLocalVarDecompiler();
     private final List<ConstructorInformation> constructors = new ArrayList<>();
+    private final List<MethodInformation> methods = new ArrayList<>();
 
     private int access = -1;
 
@@ -193,29 +194,45 @@ public class ClassFileDecompiler extends ClassVisitor {
         //      Decompile in order:
         //      1. Constructors
         for (ConstructorInformation constructor : constructors) {
+            List<Pair<String, String>> parameters = constructor.parameters();
+            List<String> exceptions = constructor.exceptions();
+
             pane.insert(innerOffset);
             pane.insert(constructor.accessModifier(), pane.getKeywordStyle());
             pane.insert(" ");
             pane.insert(constructor.constructorName(), pane.getTypeStyle());
-            pane.insert("(");
 
-            List<Pair<String, String>> constructorParameters = constructor.parameters();
-            for (Pair<String, String> constructorParameter : constructorParameters) {
-                pane.insert(constructorParameter.first(), pane.getTypeStyle());
-                pane.insert(" ");
-                pane.insert(constructorParameter.second());
+            insertMethodSignature(parameters, exceptions);
 
-                if (constructorParameters.indexOf(constructorParameter) != constructorParameters.size() - 1)
-                    pane.insert(", ");
-            }
-
-            pane.insert(") {\n");
+            pane.insert("{\n");
             pane.insert(innerOffset + "}\n\n");
         }
 
         //      2. Fields
 
         //      3. Methods
+        for (MethodInformation method : methods) {
+            List<String> modifiers = method.modifiers();
+            List<Pair<String, String>> parameters = method.parameters();
+            List<String> exceptions = method.exceptions();
+
+            pane.insert(innerOffset);
+            pane.insert(method.accessModifier(), pane.getKeywordStyle());
+            pane.insert(" ");
+            modifiers.forEach(modifier -> {
+                pane.insert(modifier, pane.getKeywordStyle());
+                pane.insert(" ");
+            });
+            pane.insert(method.returnType(), pane.getTypeStyle());
+            pane.insert(" ");
+            pane.insert(method.methodName(), pane.getTypeStyle());
+
+            insertMethodSignature(parameters, exceptions);
+
+            pane.insert("{\n");
+            pane.insert(innerOffset + "}\n\n");
+        }
+
         //      4. Inner classes
         wrapper.getInnerClasses().stream().sorted(Comparator.comparing(ClassWrapper::getSimpleName)).forEach(ic -> {
             //  Decompiles the inner class
@@ -234,8 +251,9 @@ public class ClassFileDecompiler extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        String accessModifier = AccessUtils.getAccess(access);
+
         if (name.contains("<init>")) {
-            String accessModifier = AccessUtils.getAccess(access);
             String constructorName = wrapper.getSimpleName()
                     .substring(wrapper.getSimpleName().lastIndexOf('.') + 1)
                     .substring(wrapper.getSimpleName().lastIndexOf('$') + 1);
@@ -256,21 +274,81 @@ public class ClassFileDecompiler extends ClassVisitor {
                 }
             };
 
+            //  Add the constructor to the list of constructors
             constructors.add(new ConstructorInformation(accessModifier, constructorName,
                     parameters, (exceptions == null) ? List.of() : List.of(exceptions)));
 
             return visitor;
-        }
+        } else {
+            List<String> modifiers = new ArrayList<>();
 
-        return super.visitMethod(access, name, descriptor, signature, exceptions);
+            if (AccessUtils.isStatic(access))           modifiers.add("static");
+            if (AccessUtils.isFinal(access))            modifiers.add("final");
+            if (AccessUtils.isAbstract(access))         modifiers.add("abstract");
+            if (AccessUtils.isSynchronized(access))     modifiers.add("synchronized");
+            if (AccessUtils.isNative(access))           modifiers.add("native");
+            if (AccessUtils.isStrict(access))           modifiers.add("strictfp");
+
+            String returnType = Type.getReturnType(descriptor).getClassName().substring(Type.getReturnType(descriptor).getClassName().lastIndexOf('.') + 1);
+            final List<Pair<String, String>> parameters = new ArrayList<>();
+            final Type[] argumentTypes = Type.getArgumentTypes(descriptor);
+            MethodVisitor visitor = new MethodVisitor(ASM_VERSION, localVarDecompiler) {
+                @Override
+                public void visitEnd() {
+                    List<LocalVariableNode> localVariables = localVarDecompiler.getLocalVariables();
+                    if (localVariables != null)
+                        for (int i = 0; i < argumentTypes.length; i++) {
+                            String parameterType = argumentTypes[i].getClassName().substring(argumentTypes[i].getClassName().lastIndexOf('.') + 1);
+                            String parameterName = localVariables.get(i + 1).name;
+
+                            parameters.add(new Pair<>(parameterType, parameterName));
+                        }
+                    super.visitEnd();
+                }
+            };
+
+            //  Add the method to the list of methods
+            methods.add(new MethodInformation(accessModifier, modifiers, returnType, name,
+                    parameters, (exceptions == null) ? List.of() : List.of(exceptions)));
+
+            return visitor;
+        }
     }
 
     private String separator(String input) {
         return input.isBlank() ? "" : " ";
     }
 
+    private void insertMethodSignature(List<Pair<String, String>> parameters, List<String> exceptions) {
+        pane.insert("(");
+
+        for (Pair<String, String> constructorParameter : parameters) {
+            pane.insert(constructorParameter.first(), pane.getTypeStyle());
+            pane.insert(" ");
+            pane.insert(constructorParameter.second());
+
+            if (parameters.indexOf(constructorParameter) != parameters.size() - 1)
+                pane.insert(", ");
+        }
+
+        pane.insert(")");
+
+        if (!exceptions.isEmpty()) {
+            pane.insert(" throws ", pane.getKeywordStyle());
+            for (String exception : exceptions) {
+                pane.insert(exception, pane.getTypeStyle());
+                pane.insert(" ");
+            }
+        } else
+            pane.insert(" ");
+    }
+
     private record ConstructorInformation(String accessModifier, String constructorName,
                                           List<Pair<String, String>> parameters, List<String> exceptions) {
+    }
+
+    private record MethodInformation(String accessModifier, List<String> modifiers, String returnType,
+                                     String methodName, List<Pair<String, String>> parameters, List<String> exceptions) {
     }
 
 }
