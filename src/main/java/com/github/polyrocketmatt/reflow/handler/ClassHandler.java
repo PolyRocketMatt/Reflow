@@ -48,6 +48,7 @@ public class ClassHandler {
 
                 String name = entry.getName();
 
+                //  TODO: Handle, cascading inner classes
                 if (name.endsWith(".class")) {
                     ClassNode classNode = ByteUtils.parseBytesToClassNode(data);
                     AsmDependencyDecompiler dependencyDecompiler = ByteUtils.parseDependencies(data);

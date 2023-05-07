@@ -6,9 +6,12 @@ import com.github.polyrocketmatt.reflow.gui.component.FlowStylePane;
 import com.github.polyrocketmatt.reflow.utils.types.Pair;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.github.polyrocketmatt.reflow.gui.FlowConstants.ASM_VERSION;
@@ -19,7 +22,6 @@ public class ClassFileDecompiler extends ClassVisitor {
     private final ClassWrapper wrapper;
     private final FlowStylePane pane;
     private final String offset;
-
     private final AsmAnnotationDecompiler annotationDecompiler = new AsmAnnotationDecompiler();
 
     private int access;
@@ -46,7 +48,6 @@ public class ClassFileDecompiler extends ClassVisitor {
         String finalModifier = isFinal() ? "final" : "";
         String abstractModifier = isAbstract() ? "abstract" : "";
         String classType = getClassType();
-
         boolean isAnnotation = isAnnotation();
 
         //  Then we parse the class name
@@ -185,13 +186,15 @@ public class ClassFileDecompiler extends ClassVisitor {
         pane.insert("{\n\n", null);
 
         //      Decompile in order:
-        //      1. Fields
+        //      1. Constructors
 
-        //      2. Methods
-        //      3. Inner classes
-        wrapper.getInnerClasses().forEach(ic -> {
-            ClassFileDecompiler decompiler = new ClassFileDecompiler(source, ic, pane, offset + "    ");
+        //      2. Fields
 
+        //      3. Methods
+        //      4. Inner classes
+        wrapper.getInnerClasses().stream().sorted(Comparator.comparing(ClassWrapper::getSimpleName)).forEach(ic -> {
+            //  Decompiles the inner class
+            new ClassFileDecompiler(source, ic, pane, offset + "    ");
             pane.insert("\n");
         });
 
@@ -202,6 +205,17 @@ public class ClassFileDecompiler extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         this.access = access;
+    }
+
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        if (name.contains("<init>")) {
+            System.out.println("Found constructor: " + descriptor);
+            System.out.println("    Signature: " + signature);
+            System.out.println("    Exceptions: " + Arrays.toString(exceptions));
+        }
+
+        return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
 
     private String separator(String input) {

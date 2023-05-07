@@ -40,18 +40,6 @@ public class ClassWrapper implements Wrapper {
         this.simpleName = split[split.length - 1];
     }
 
-    public ClassWrapper(@NotNull String name, @NotNull Set<String> imports, byte[] data, boolean isLibraryNode) {
-        this.node = null;
-        this.imports = imports;
-        this.methodWrappers = null;
-        this.fieldWrappers = null;
-        this.innerClasses = null;
-        this.data = data;
-        this.isLibraryNode = isLibraryNode;
-        this.className = name;
-        this.simpleName = name;
-    }
-
     public ClassNode getNode() {
         return node;
     }
