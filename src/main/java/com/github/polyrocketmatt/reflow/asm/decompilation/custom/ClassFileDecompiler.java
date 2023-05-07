@@ -1,16 +1,18 @@
 package com.github.polyrocketmatt.reflow.asm.decompilation.custom;
 
 import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmAnnotationDecompiler;
+import com.github.polyrocketmatt.reflow.asm.decompilation.asm.AsmLocalVarDecompiler;
 import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 import com.github.polyrocketmatt.reflow.gui.component.FlowStylePane;
+import com.github.polyrocketmatt.reflow.utils.AccessUtils;
 import com.github.polyrocketmatt.reflow.utils.types.Pair;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.LocalVariableNode;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -23,8 +25,10 @@ public class ClassFileDecompiler extends ClassVisitor {
     private final FlowStylePane pane;
     private final String offset;
     private final AsmAnnotationDecompiler annotationDecompiler = new AsmAnnotationDecompiler();
+    private final AsmLocalVarDecompiler localVarDecompiler = new AsmLocalVarDecompiler();
+    private final List<ConstructorInformation> constructors = new ArrayList<>();
 
-    private int access;
+    private int access = -1;
 
     public ClassFileDecompiler(String source, ClassWrapper wrapper, FlowStylePane pane, String offset) {
         super(ASM_VERSION);
@@ -38,17 +42,18 @@ public class ClassFileDecompiler extends ClassVisitor {
     }
 
     public void decompile() {
+        String innerOffset = offset + "    ";
         ClassReader reader = new ClassReader(wrapper.getData());
 
         reader.accept(this, 0);
 
         //  We first parse the access and modifier flags
-        String accessModifier = getAccess();
-        String staticModifier = isStatic() ? "static" : "";
-        String finalModifier = isFinal() ? "final" : "";
-        String abstractModifier = isAbstract() ? "abstract" : "";
-        String classType = getClassType();
-        boolean isAnnotation = isAnnotation();
+        String accessModifier = AccessUtils.getAccess(access);
+        String staticModifier = AccessUtils.isStatic(access) ? "static" : "";
+        String finalModifier = AccessUtils.isFinal(access) ? "final" : "";
+        String abstractModifier = AccessUtils.isAbstract(access) ? "abstract" : "";
+        String classType = AccessUtils.getClassType(access);
+        boolean isAnnotation =AccessUtils. isAnnotation(access);
 
         //  Then we parse the class name
         String className = wrapper.getSimpleName().substring(wrapper.getSimpleName().lastIndexOf('$') + 1);
@@ -187,6 +192,26 @@ public class ClassFileDecompiler extends ClassVisitor {
 
         //      Decompile in order:
         //      1. Constructors
+        for (ConstructorInformation constructor : constructors) {
+            pane.insert(innerOffset);
+            pane.insert(constructor.accessModifier(), pane.getKeywordStyle());
+            pane.insert(" ");
+            pane.insert(constructor.constructorName(), pane.getTypeStyle());
+            pane.insert("(");
+
+            List<Pair<String, String>> constructorParameters = constructor.parameters();
+            for (Pair<String, String> constructorParameter : constructorParameters) {
+                pane.insert(constructorParameter.first(), pane.getTypeStyle());
+                pane.insert(" ");
+                pane.insert(constructorParameter.second());
+
+                if (constructorParameters.indexOf(constructorParameter) != constructorParameters.size() - 1)
+                    pane.insert(", ");
+            }
+
+            pane.insert(") {\n");
+            pane.insert(innerOffset + "}\n\n");
+        }
 
         //      2. Fields
 
@@ -194,7 +219,7 @@ public class ClassFileDecompiler extends ClassVisitor {
         //      4. Inner classes
         wrapper.getInnerClasses().stream().sorted(Comparator.comparing(ClassWrapper::getSimpleName)).forEach(ic -> {
             //  Decompiles the inner class
-            new ClassFileDecompiler(source, ic, pane, offset + "    ");
+            new ClassFileDecompiler(source, ic, pane, innerOffset);
             pane.insert("\n");
         });
 
@@ -210,9 +235,31 @@ public class ClassFileDecompiler extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         if (name.contains("<init>")) {
-            System.out.println("Found constructor: " + descriptor);
-            System.out.println("    Signature: " + signature);
-            System.out.println("    Exceptions: " + Arrays.toString(exceptions));
+            String accessModifier = AccessUtils.getAccess(access);
+            String constructorName = wrapper.getSimpleName()
+                    .substring(wrapper.getSimpleName().lastIndexOf('.') + 1)
+                    .substring(wrapper.getSimpleName().lastIndexOf('$') + 1);
+            final List<Pair<String, String>> parameters = new ArrayList<>();
+            final Type[] argumentTypes = Type.getArgumentTypes(descriptor);
+            MethodVisitor visitor = new MethodVisitor(ASM_VERSION, localVarDecompiler) {
+                @Override
+                public void visitEnd() {
+                    List<LocalVariableNode> localVariables = localVarDecompiler.getLocalVariables();
+                    if (localVariables != null)
+                        for (int i = 0; i < argumentTypes.length; i++) {
+                            String parameterType = argumentTypes[i].getClassName().substring(argumentTypes[i].getClassName().lastIndexOf('.') + 1);
+                            String parameterName = localVariables.get(i + 1).name;
+
+                            parameters.add(new Pair<>(parameterType, parameterName));
+                        }
+                    super.visitEnd();
+                }
+            };
+
+            constructors.add(new ConstructorInformation(accessModifier, constructorName,
+                    parameters, (exceptions == null) ? List.of() : List.of(exceptions)));
+
+            return visitor;
         }
 
         return super.visitMethod(access, name, descriptor, signature, exceptions);
@@ -222,66 +269,8 @@ public class ClassFileDecompiler extends ClassVisitor {
         return input.isBlank() ? "" : " ";
     }
 
-    private String getAccess() {
-        if (isPublic())
-            return "public";
-        else if (isPrivate())
-            return "private";
-        else if (isProtected())
-            return "protected";
-        return "";
-    }
-
-    private String getClassType() {
-        if (isAnnotation())
-            return "@interface";
-        else if (isInterface())
-            return "interface";
-        else if (isEnum())
-            return "enum";
-        else if (isModule())
-            return "module";
-        return "class";
-    }
-
-    private boolean isPublic() {
-        return (access & Opcodes.ACC_PUBLIC) != 0;
-    }
-
-    private boolean isPrivate() {
-        return (access & Opcodes.ACC_PRIVATE) != 0;
-    }
-
-    private boolean isProtected() {
-        return (access & Opcodes.ACC_PROTECTED) != 0;
-    }
-
-    private boolean isStatic() {
-        return (access & Opcodes.ACC_STATIC) != 0;
-    }
-
-    private boolean isAbstract() {
-        return (access & Opcodes.ACC_ABSTRACT) != 0 && !isInterface() && !isAnnotation();
-    }
-
-    private boolean isFinal() {
-        return (access & Opcodes.ACC_FINAL) != 0;
-    }
-
-    private boolean isInterface() {
-        return (access & Opcodes.ACC_INTERFACE) != 0;
-    }
-
-    private boolean isAnnotation() {
-        return (access & Opcodes.ACC_ANNOTATION) != 0;
-    }
-
-    private boolean isEnum() {
-        return (access & Opcodes.ACC_ENUM) != 0;
-    }
-
-    private boolean isModule() {
-        return (access & Opcodes.ACC_MODULE) != 0;
+    private record ConstructorInformation(String accessModifier, String constructorName,
+                                          List<Pair<String, String>> parameters, List<String> exceptions) {
     }
 
 }

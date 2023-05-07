@@ -50,6 +50,9 @@ public class ClassWrapper implements Wrapper {
 
     public void updateImports(Set<String> imports) {
         this.imports.addAll(imports);
+
+        //  Check if the class name is in the imports, if so, remove it
+        this.imports.removeIf(importName -> importName.endsWith("." + simpleName));
     }
 
     public Set<MethodWrapper> getMethodWrappers() {
