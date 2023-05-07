@@ -108,6 +108,7 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
         signatureVisitor.addTypeSignature(sign);
     }
 
+    @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         if (signature == null) {
             addName(superName);
@@ -117,6 +118,7 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
         }
     }
 
+    @Override
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) {
         if (signature == null)
             addDesc(desc);
@@ -129,6 +131,7 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
         return fieldVisitor;
     }
 
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         if (signature == null)
             addMethodDesc(desc);
@@ -138,6 +141,7 @@ public class AsmDependencyDecompiler extends ClassVisitor implements Decompiler 
         return methodVisitor;
     }
 
+    @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
         addDesc(desc);
 

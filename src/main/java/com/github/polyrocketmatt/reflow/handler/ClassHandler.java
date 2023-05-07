@@ -89,7 +89,13 @@ public class ClassHandler {
         for (ClassWrapper wrapper : classes.keySet()) {
             String key = wrapper.getSimpleName();
             Set<ClassWrapper> wrappers = innerClassMap.getOrDefault(key, new HashSet<>());
+            Set<String> innerClassImports = wrappers.stream().map(ClassWrapper::getImports).reduce(new HashSet<>(), (a, b) -> {
+                a.addAll(b);
 
+                return a;
+            });
+
+            wrapper.updateImports(innerClassImports);
             wrapper.updateInnerClasses(wrappers);
         }
     }

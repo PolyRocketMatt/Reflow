@@ -60,6 +60,10 @@ public class ClassWrapper implements Wrapper {
         return imports;
     }
 
+    public void updateImports(Set<String> imports) {
+        this.imports.addAll(imports);
+    }
+
     public Set<MethodWrapper> getMethodWrappers() {
         return methodWrappers;
     }
