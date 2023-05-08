@@ -3,11 +3,17 @@ package com.github.polyrocketmatt.reflow.gui.component;
 import com.github.polyrocketmatt.reflow.utils.ByteUtils;
 
 import javax.swing.*;
-import javax.swing.event.HyperlinkEvent;
+import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
 import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.text.Utilities;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.util.Set;
 
 public class FlowStylePane implements FlowComponent {
@@ -48,14 +54,49 @@ public class FlowStylePane implements FlowComponent {
         this.scrollPane = new JScrollPane(pane);
         this.scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-        // Add a hyperlink listener to the text pane
-        this.pane.addHyperlinkListener(event -> {
-            if (event.getEventType() == HyperlinkEvent.EventType.ENTERED)
-                pane.setCursor(cursor);
-            else if (event.getEventType() == HyperlinkEvent.EventType.EXITED)
-                pane.setCursor(Cursor.getDefaultCursor());
-            else {
-                System.out.println(event.getDescription());
+        // Add mouse listeners to the text pane
+        this.pane.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                int offset = pane.viewToModel2D(event.getPoint());
+
+                StyledDocument doc = pane.getStyledDocument();
+                Element elem = doc.getCharacterElement(offset);
+                AttributeSet attrs = elem.getAttributes();
+
+                if (StyleConstants.isUnderline(attrs)) {
+                    try {
+                        int startOffset = Utilities.getWordStart(pane, offset);
+                        int endOffset = Utilities.getWordEnd(pane, offset);
+
+                        String word = doc.getText(startOffset, endOffset - startOffset);
+
+                        //  Find the internal type that contains the word
+                        String internalType = internalTypes.stream()
+                                .filter(type -> type.contains(word))
+                                .findFirst()
+                                .orElse(null);
+
+                        
+                    } catch (BadLocationException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        });
+        this.pane.addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent event) {
+                int offset = pane.viewToModel2D(event.getPoint());
+
+                StyledDocument doc = pane.getStyledDocument();
+                Element elem = doc.getCharacterElement(offset);
+                AttributeSet attrs = elem.getAttributes();
+
+                if (StyleConstants.isUnderline(attrs))
+                    pane.setCursor(cursor);
+                else
+                    pane.setCursor(Cursor.getDefaultCursor());
             }
         });
     }

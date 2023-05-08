@@ -76,7 +76,7 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
     }
 
     private Set<String> parseInternalTypes() {
-        return CLASS_HANDLER.getClasses()
+        return CLASS_HANDLER.getAllClasses()
                 .keySet()
                 .stream()
                 .map(ClassWrapper::getSimpleName)

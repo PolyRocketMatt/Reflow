@@ -109,6 +109,24 @@ public class ClassHandler {
         return classes;
     }
 
+    public Map<ClassWrapper, String> getAllClasses() {
+        Map<ClassWrapper, String> allClasses = new HashMap<>(classes);
+
+        for (Map.Entry<String, Set<ClassWrapper>> innerClassEntry : innerClassMap.entrySet()) {
+            ClassWrapper prefixClass = classes.keySet()
+                    .stream()
+                    .filter(cn -> cn.getSimpleName().equals(innerClassEntry.getKey()))
+                    .findFirst()
+                    .orElse(null);
+            String prefix = prefixClass != null ? classes.get(prefixClass).substring(0, prefixClass.getClassName().lastIndexOf("/") + 1) : innerClassEntry.getKey();
+
+            for (ClassWrapper wrapper : innerClassEntry.getValue())
+                allClasses.put(wrapper, prefix + wrapper.getSimpleName());
+        }
+
+        return allClasses;
+    }
+
     public Map<String, Set<ClassWrapper>> getInnerClassMap() {
         return innerClassMap;
     }

@@ -209,7 +209,7 @@ public class ClassFileDecompiler extends ClassVisitor {
 
             insertMethodSignature(parameters, exceptions);
 
-            pane.insert("{\n");
+            pane.insert(" {\n");
             pane.insert(innerOffset + "}\n\n");
         }
 
@@ -234,8 +234,13 @@ public class ClassFileDecompiler extends ClassVisitor {
 
             insertMethodSignature(parameters, exceptions);
 
-            pane.insert("{\n");
-            pane.insert(innerOffset + "}\n\n");
+            //  Check if the method is abstract
+            if (modifiers.contains("abstract"))
+                pane.insert(";\n\n");
+            else {
+                pane.insert(" {\n");
+                pane.insert(innerOffset + "}\n\n");
+            }
         }
 
         //      4. Inner classes
@@ -352,8 +357,7 @@ public class ClassFileDecompiler extends ClassVisitor {
                 pane.insert(exception, pane.getTypeStyle(exception));
                 pane.insert(" ");
             }
-        } else
-            pane.insert(" ");
+        }
     }
 
     private record ConstructorInformation(String accessModifier, String constructorName,
