@@ -11,9 +11,12 @@ import javax.swing.text.*;
 
 import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
 
+/**
+ * Credit: <a href="https://tips4java.wordpress.com/2009/05/23/text-component-line-number/">Line Number Component</a>
+ */
 public class TextLineNumber extends JPanel implements CaretListener, DocumentListener, PropertyChangeListener {
 
-    private final static Border OUTER = new MatteBorder(0, 0, 0, 2, PALETTE.getTint());
+    private final static Border OUTER = new MatteBorder(0, 0, 0, 2, PALETTE.getSelect());
     public final static float RIGHT = 1.0f;
     private final static int HEIGHT = Integer.MAX_VALUE - 1000000;
 
@@ -123,7 +126,7 @@ public class TextLineNumber extends JPanel implements CaretListener, DocumentLis
         Graphics2D graphics2D = (Graphics2D) g.create();
         graphics2D.setFont(font);
         graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        graphics2D.setColor(Color.BLACK);
+        graphics2D.setColor(PALETTE.getTint());
 
         FontMetrics fontMetrics = component.getFontMetrics( component.getFont() );
         Insets insets = getInsets();

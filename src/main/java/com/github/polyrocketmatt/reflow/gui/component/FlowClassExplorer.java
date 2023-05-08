@@ -114,7 +114,8 @@ public class FlowClassExplorer extends FlowComponent {
                 ClassWrapper wrapper = wrappers.stream().filter(w -> w.getSimpleName().equals(className)).findFirst().orElse(null);
 
                 //  TODO: Decompile the class based on the class name
-                decompileClass(wrapper, classPath, className);
+                if (wrapper != null)
+                    decompileClass(wrapper, classPath, className);
             }
         });
 

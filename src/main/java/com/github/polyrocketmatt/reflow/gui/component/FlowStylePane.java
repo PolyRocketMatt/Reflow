@@ -17,6 +17,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.github.polyrocketmatt.reflow.ReFlow.CLASS_HANDLER;
 import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
@@ -79,18 +80,56 @@ public class FlowStylePane extends FlowComponent {
                         String word = doc.getText(startOffset, endOffset - startOffset);
 
                         //  Find the internal type that contains the word
-                        String primitiveClassName = internalTypes.stream()
+                        Set<String> primitiveClassNames = internalTypes.stream()
                                 .filter(type -> type.contains(word))
-                                .findFirst()
-                                .orElse("");
+                                .collect(Collectors.toSet());
+
+                        //  Check if the current class might be an inner class
+                        Set<String> outerClasses = primitiveClassNames.stream().filter(type -> !type.contains("$")).collect(Collectors.toSet());
+                        Set<String> innerClasses = primitiveClassNames.stream().filter(type -> type.contains("$")).collect(Collectors.toSet());
+
+                        //  First we check for a match in the outer classes
+                        for (String outerClassName : outerClasses) {
+                            if (outerClassName.equals(word)) {
+                                ClassWrapper wrapper = CLASS_HANDLER.get(outerClassName);
+                                String classPath = wrapper.getClassName();
+                                FlowClassExplorer explorer = (FlowClassExplorer) INTERFACE.getFlowComponent(FlowClassExplorer.class);
+
+                                if (explorer != null)
+                                    explorer.decompileClass(wrapper, classPath, outerClassName);
+
+                                break;
+                            }
+                        }
+
+                        for (String innerClassName : innerClasses) {
+                            if (innerClassName.substring(innerClassName.lastIndexOf("$") + 1).equals(word)) {
+                                String className = innerClassName.substring(0, innerClassName.lastIndexOf("$"));
+                                ClassWrapper wrapper = CLASS_HANDLER.get(className);
+                                String classPath = wrapper.getClassName();
+                                FlowClassExplorer explorer = (FlowClassExplorer) INTERFACE.getFlowComponent(FlowClassExplorer.class);
+
+                                if (explorer != null)
+                                    explorer.decompileClass(wrapper, classPath, className);
+
+                                break;
+                            }
+                        }
+
+
+                        /*
                         //  We find the class-wrapper of the (possible outer) class
-                        String className = primitiveClassName.substring(0, primitiveClassName.indexOf('$'));
+                        boolean isInner = primitiveClassName.contains("$");
+
+                        String className = isInner ? primitiveClassName.substring(0, primitiveClassName.indexOf('$')) : primitiveClassName;
                         ClassWrapper wrapper = CLASS_HANDLER.get(className);
                         String classPath = wrapper.getClassName();
                         FlowClassExplorer explorer = (FlowClassExplorer) INTERFACE.getFlowComponent(FlowClassExplorer.class);
 
                         if (explorer != null)
                             explorer.decompileClass(wrapper, classPath, className);
+
+                         */
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }
