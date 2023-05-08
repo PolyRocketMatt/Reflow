@@ -13,14 +13,11 @@ import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
 
 public class TextLineNumber extends JPanel implements CaretListener, DocumentListener, PropertyChangeListener {
 
-    public final static float LEFT = 0.0f;
-    public final static float CENTER = 0.5f;
+    private final static Border OUTER = new MatteBorder(0, 0, 0, 2, PALETTE.getTint());
     public final static float RIGHT = 1.0f;
-
-    private final static Border OUTER = new MatteBorder(0, 0, 0, 2, Color.GRAY);
     private final static int HEIGHT = Integer.MAX_VALUE - 1000000;
 
-    private JTextComponent component;
+    private final JTextComponent component;
 
     private boolean updateFont;
     private int borderGap;
@@ -138,20 +135,12 @@ public class TextLineNumber extends JPanel implements CaretListener, DocumentLis
 
         while (rowStartOffset <= endOffset) {
             try {
-                /*
-                if (isCurrentLine(rowStartOffset))
-                    graphics2D.setColor(getCurrentLineForeground());
-                else
-                    graphics2D.setColor(getForeground());
-
-                 */
-
                 String lineNumber = getTextLineNumber(rowStartOffset);
                 int stringWidth = fontMetrics.stringWidth( lineNumber );
                 int x = getOffsetX(availableWidth, stringWidth) + insets.left;
                 int y = getOffsetY(rowStartOffset, fontMetrics);
-                graphics2D.drawString(lineNumber, x, y);
 
+                graphics2D.drawString(lineNumber, x, y);
                 rowStartOffset = Utilities.getRowEnd(component, rowStartOffset) + 1;
             }
             catch(Exception ex) { break; }
@@ -256,12 +245,13 @@ public class TextLineNumber extends JPanel implements CaretListener, DocumentLis
 
                 if (rect != null && rect.getY() != lastHeight) {
                     setPreferredWidth();
-//				    repaint();
                     getParent().repaint();
                     lastHeight = (int) rect.getY();
                 }
             }
-            catch (BadLocationException ex) { /* nothing to do */ }
+            catch (BadLocationException ex) {
+                //  Nothing to do
+            }
         });
     }
 
@@ -274,7 +264,6 @@ public class TextLineNumber extends JPanel implements CaretListener, DocumentLis
                 lastDigits = 0;
                 setPreferredWidth();
             } else {
-//				repaint();
                 getParent().repaint();
             }
         }

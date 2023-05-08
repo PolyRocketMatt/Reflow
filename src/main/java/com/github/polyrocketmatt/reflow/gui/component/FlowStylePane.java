@@ -79,10 +79,12 @@ public class FlowStylePane extends FlowComponent {
                         String word = doc.getText(startOffset, endOffset - startOffset);
 
                         //  Find the internal type that contains the word
-                        String className = internalTypes.stream()
+                        String primitiveClassName = internalTypes.stream()
                                 .filter(type -> type.contains(word))
                                 .findFirst()
-                                .orElse(null);
+                                .orElse("");
+                        //  We find the class-wrapper of the (possible outer) class
+                        String className = primitiveClassName.substring(0, primitiveClassName.indexOf('$'));
                         ClassWrapper wrapper = CLASS_HANDLER.get(className);
                         String classPath = wrapper.getClassName();
                         FlowClassExplorer explorer = (FlowClassExplorer) INTERFACE.getFlowComponent(FlowClassExplorer.class);

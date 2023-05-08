@@ -157,8 +157,6 @@ public class FlowClassExplorer extends FlowComponent {
     }
 
     public void decompileClass(ClassWrapper wrapper, String classPath, String className) {
-        System.out.println("DECOMPILING... -> " + wrapper.getClassName());
-
         //  First we check if there already is a tab with the same name
         if (decompiledTabs.getTabByName(className) != null) {
             decompiledTabs.setSelectedTab(decompiledTabs.getIndexOf(decompiledTabs.getTabByName(className)));
