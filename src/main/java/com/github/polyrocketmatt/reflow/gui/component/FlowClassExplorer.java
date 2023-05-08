@@ -10,7 +10,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.io.File;
@@ -21,9 +20,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
 import static com.github.polyrocketmatt.reflow.ReFlow.TEMP_DIR;
 
-public class FlowClassExplorer implements FlowComponent {
+public class FlowClassExplorer extends FlowComponent {
 
     private final JPanel parentPanel;
     private final JScrollPane classTree;
@@ -38,6 +38,8 @@ public class FlowClassExplorer implements FlowComponent {
 
         this.parentPanel.add(classTree, BorderLayout.WEST);
         this.parentPanel.add(decompiledTabs.getComponent(), BorderLayout.CENTER);
+
+        INTERFACE.register(this);
     }
 
     @Override
@@ -46,9 +48,9 @@ public class FlowClassExplorer implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
+    public void setVisible(boolean visibility) {
         classTree.setVisible(visibility);
-        decompiledTabs.setVisibile(visibility);
+        decompiledTabs.setVisible(visibility);
         parentPanel.setVisible(visibility);
     }
 
@@ -112,7 +114,7 @@ public class FlowClassExplorer implements FlowComponent {
                 ClassWrapper wrapper = wrappers.stream().filter(w -> w.getSimpleName().equals(className)).findFirst().orElse(null);
 
                 //  TODO: Decompile the class based on the class name
-                decompileClass(wrapper, classPath, className, wrappers);
+                decompileClass(wrapper, classPath, className);
             }
         });
 
@@ -154,7 +156,9 @@ public class FlowClassExplorer implements FlowComponent {
         }
     }
 
-    private void decompileClass(ClassWrapper wrapper, String classPath, String className, Set<ClassWrapper> wrappers) {
+    public void decompileClass(ClassWrapper wrapper, String classPath, String className) {
+        System.out.println("DECOMPILING... -> " + wrapper.getClassName());
+
         //  First we check if there already is a tab with the same name
         if (decompiledTabs.getTabByName(className) != null) {
             decompiledTabs.setSelectedTab(decompiledTabs.getIndexOf(decompiledTabs.getTabByName(className)));

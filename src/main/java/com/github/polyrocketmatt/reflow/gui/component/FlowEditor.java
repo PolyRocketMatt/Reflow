@@ -2,9 +2,10 @@ package com.github.polyrocketmatt.reflow.gui.component;
 
 import javax.swing.*;
 
-public class FlowEditor implements FlowComponent {
+import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
 
-    private final int index;
+public class FlowEditor extends FlowComponent {
+
     private final JPanel pipelinePanel;
     private final JPanel logPanel;
     private final JSplitPane panel;
@@ -12,7 +13,8 @@ public class FlowEditor implements FlowComponent {
     private final FlowTabbedPanel log;
 
     public FlowEditor(int index, int width, int height) {
-        this.index = index;
+        super(index);
+
         this.pipelinePanel = new JPanel();
         this.logPanel = new JPanel();
         this.panel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, pipelinePanel, logPanel);
@@ -38,11 +40,8 @@ public class FlowEditor implements FlowComponent {
 
         //  Log panels
         this.log.add("Log");
-    }
 
-    @Override
-    public int getIndex() {
-        return index;
+        INTERFACE.register(this);
     }
 
     @Override
@@ -51,12 +50,12 @@ public class FlowEditor implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
+    public void setVisible(boolean visibility) {
         pipelinePanel.setVisible(visibility);
         logPanel.setVisible(visibility);
         panel.setVisible(visibility);
-        pipeline.setVisibile(visibility);
-        log.setVisibile(visibility);
+        pipeline.setVisible(visibility);
+        log.setVisible(visibility);
     }
 
     public JPanel getPipelinePanel() {

@@ -11,10 +11,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
 import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
 import static com.github.polyrocketmatt.reflow.gui.FlowConstants.DIM_17;
 
-public class FlowTabbedPanel implements FlowComponent {
+public class FlowTabbedPanel extends FlowComponent {
 
     private final JTabbedPane tabPane;
     private final List<FlowTab> tabs;
@@ -26,6 +27,8 @@ public class FlowTabbedPanel implements FlowComponent {
         this.tabs = new ArrayList<>();
         this.iconPanels = new HashMap<>();
         this.isCloseable = isCloseable;
+
+        INTERFACE.register(this);
     }
 
     public FlowTab add(String name) {
@@ -48,8 +51,8 @@ public class FlowTabbedPanel implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
-        tabs.forEach(tab -> tab.setVisibile(visibility));
+    public void setVisible(boolean visibility) {
+        tabs.forEach(tab -> tab.setVisible(visibility));
         tabPane.setVisible(visibility);
     }
 

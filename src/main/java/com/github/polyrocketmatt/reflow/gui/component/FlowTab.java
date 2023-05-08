@@ -5,9 +5,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
 import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
 
-public class FlowTab implements FlowComponent {
+public class FlowTab extends FlowComponent {
 
     private final String tabName;
     private final JPanel panel;
@@ -30,6 +31,8 @@ public class FlowTab implements FlowComponent {
                 tabComponent.setBackground(PALETTE.getUnselect());
             }
         });
+
+        INTERFACE.register(this);
     }
 
     @Override
@@ -38,7 +41,7 @@ public class FlowTab implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
+    public void setVisible(boolean visibility) {
         panel.setVisible(visibility);
     }
 

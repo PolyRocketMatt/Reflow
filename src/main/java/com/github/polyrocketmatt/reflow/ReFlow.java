@@ -4,7 +4,6 @@ import com.github.polyrocketmatt.reflow.gui.FlowInterface;
 import com.github.polyrocketmatt.reflow.gui.palette.FlowPalette;
 import com.github.polyrocketmatt.reflow.gui.palette.LightFlowPalette;
 import com.github.polyrocketmatt.reflow.handler.ClassHandler;
-import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
 import java.util.UUID;
@@ -25,6 +24,8 @@ public class ReFlow {
         //  TODO: Add dark theme
         PALETTE = new LightFlowPalette();
         INTERFACE = new FlowInterface();
+        INTERFACE.initialise();
+
         CLASS_HANDLER = ClassHandler.INSTANCE;
     }
 

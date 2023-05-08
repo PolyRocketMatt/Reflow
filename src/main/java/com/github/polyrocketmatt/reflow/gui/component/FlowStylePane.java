@@ -1,6 +1,8 @@
 package com.github.polyrocketmatt.reflow.gui.component;
 
+import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 import com.github.polyrocketmatt.reflow.utils.ByteUtils;
+import com.github.polyrocketmatt.reflow.utils.TextLineNumber;
 
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
@@ -16,7 +18,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.Set;
 
-public class FlowStylePane implements FlowComponent {
+import static com.github.polyrocketmatt.reflow.ReFlow.CLASS_HANDLER;
+import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
+
+public class FlowStylePane extends FlowComponent {
 
     private final JScrollPane scrollPane;
     private final JTextPane pane;
@@ -35,6 +40,8 @@ public class FlowStylePane implements FlowComponent {
     private final Cursor cursor;
 
     public FlowStylePane(Set<String> types, Set<String> internalTypes) {
+        Font font = new Font("Consolas", Font.PLAIN, 12);
+
         this.pane = new JTextPane();
         this.document = pane.getStyledDocument();
         this.types = types;
@@ -49,7 +56,7 @@ public class FlowStylePane implements FlowComponent {
         this.cursor = new Cursor(Cursor.HAND_CURSOR);
 
         this.pane.setEditable(false);
-        this.pane.setFont(new Font("Consolas", Font.PLAIN, 12));
+        this.pane.setFont(font);
         this.pane.setMargin(new Insets(5, 5, 5, 5));
         this.scrollPane = new JScrollPane(pane);
         this.scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -72,12 +79,16 @@ public class FlowStylePane implements FlowComponent {
                         String word = doc.getText(startOffset, endOffset - startOffset);
 
                         //  Find the internal type that contains the word
-                        String internalType = internalTypes.stream()
+                        String className = internalTypes.stream()
                                 .filter(type -> type.contains(word))
                                 .findFirst()
                                 .orElse(null);
+                        ClassWrapper wrapper = CLASS_HANDLER.get(className);
+                        String classPath = wrapper.getClassName();
+                        FlowClassExplorer explorer = (FlowClassExplorer) INTERFACE.getFlowComponent(FlowClassExplorer.class);
 
-
+                        if (explorer != null)
+                            explorer.decompileClass(wrapper, classPath, className);
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }
@@ -99,6 +110,11 @@ public class FlowStylePane implements FlowComponent {
                     pane.setCursor(Cursor.getDefaultCursor());
             }
         });
+
+        //  Line numbers?
+        this.scrollPane.setRowHeaderView(new TextLineNumber(this.pane, font));
+
+        INTERFACE.register(this);
     }
 
     @Override
@@ -107,7 +123,7 @@ public class FlowStylePane implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
+    public void setVisible(boolean visibility) {
         pane.setVisible(visibility);
     }
 

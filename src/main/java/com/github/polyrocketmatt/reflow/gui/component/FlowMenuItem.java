@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class FlowMenuItem implements FlowComponent {
+public class FlowMenuItem extends FlowComponent {
 
     private final JMenuItem item;
 
@@ -33,7 +33,7 @@ public class FlowMenuItem implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
+    public void setVisible(boolean visibility) {
 
     }
 }

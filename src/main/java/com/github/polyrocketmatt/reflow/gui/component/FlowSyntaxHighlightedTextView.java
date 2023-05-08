@@ -5,7 +5,6 @@ import com.github.polyrocketmatt.reflow.asm.wrapper.ClassWrapper;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -13,10 +12,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.github.polyrocketmatt.reflow.ReFlow.CLASS_HANDLER;
-import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
+import static com.github.polyrocketmatt.reflow.ReFlow.*;
 
-public class FlowSyntaxHighlightedTextView implements FlowComponent {
+public class FlowSyntaxHighlightedTextView extends FlowComponent {
 
     private final String source;
     private final ClassWrapper wrapper;
@@ -54,6 +52,8 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
         parsePackage();
         parseImports();
         parseClass();
+
+        INTERFACE.register(this);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class FlowSyntaxHighlightedTextView implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
-        stylePane.setVisibile(visibility);
+    public void setVisible(boolean visibility) {
+        stylePane.setVisible(visibility);
     }
 
     private void insert(StyledDocument document, int length, String part, Style style) {

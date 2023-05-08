@@ -2,7 +2,7 @@ package com.github.polyrocketmatt.reflow.gui.component;
 
 import javax.swing.*;
 
-public class FlowMenu implements FlowComponent {
+public class FlowMenu extends FlowComponent {
 
     private final JMenu menu;
 
@@ -20,7 +20,7 @@ public class FlowMenu implements FlowComponent {
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
+    public void setVisible(boolean visibility) {
 
     }
 }

@@ -24,6 +24,7 @@ public class ClassHandler {
     private File file;
     private Map<ClassWrapper, String> classes;
     private Map<String, Set<ClassWrapper>> innerClassMap;
+    private Map<String, ClassWrapper> wrapperMap;
     private Map<String, byte[]> resources;
     private Logger logger;
 
@@ -33,6 +34,7 @@ public class ClassHandler {
         this.file = file;
         this.classes = new HashMap<>();
         this.innerClassMap = new HashMap<>();
+        this.wrapperMap = new HashMap<>();
         this.resources = new HashMap<>();
         this.logger = LoggerFactory.getLogger("ClassHandler");
 
@@ -66,10 +68,13 @@ public class ClassHandler {
                         Set<ClassWrapper> wrappers = innerClassMap.getOrDefault(key, new HashSet<>());
                         wrappers.add(wrapper);
                         innerClassMap.put(key, wrappers);
+                        wrapperMap.put(wrapper.getSimpleName(), wrapper);
 
                         continue;
                     }
+
                     classes.put(wrapper, name);
+                    wrapperMap.put(wrapper.getSimpleName(), wrapper);
                 } else {
                     if (name.equals("META-INF/MANIFEST.MF")) {
                         String manifest = new String(data);
@@ -107,6 +112,10 @@ public class ClassHandler {
 
     public Map<ClassWrapper, String> getClasses() {
         return classes;
+    }
+
+    public ClassWrapper get(String key) {
+        return wrapperMap.get(key);
     }
 
     public Map<ClassWrapper, String> getAllClasses() {

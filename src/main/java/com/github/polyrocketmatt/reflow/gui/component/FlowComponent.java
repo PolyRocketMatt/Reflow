@@ -2,14 +2,28 @@ package com.github.polyrocketmatt.reflow.gui.component;
 
 import java.awt.*;
 
-public interface FlowComponent {
+public abstract class FlowComponent {
 
-    default int getIndex() {
-        return -1;
+    public int index;
+
+    public FlowComponent(int index) {
+        this.index = index;
     }
 
-    Component getComponent();
+    public FlowComponent() {
+        this.index = -1;
+    }
 
-    void setVisibile(boolean visibility);
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public abstract Component getComponent();
+
+    public abstract void setVisible(boolean visibility);
 
 }

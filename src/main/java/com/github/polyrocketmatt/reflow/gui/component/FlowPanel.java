@@ -3,14 +3,17 @@ package com.github.polyrocketmatt.reflow.gui.component;
 import javax.swing.*;
 import java.awt.*;
 
-public class FlowPanel implements FlowComponent {
+import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
 
-    private final int index;
+public class FlowPanel extends FlowComponent {
+
     private final JPanel panel;
 
     public FlowPanel(int index) {
-        this.index = index;
+        super(index);
         this.panel = new JPanel();
+
+        INTERFACE.register(this);
     }
 
     public FlowPanel(int index, LayoutManager manager) {
@@ -19,17 +22,12 @@ public class FlowPanel implements FlowComponent {
     }
 
     @Override
-    public int getIndex() {
-        return index;
-    }
-
-    @Override
     public JPanel getComponent() {
         return panel;
     }
 
     @Override
-    public void setVisibile(boolean visibility) {
+    public void setVisible(boolean visibility) {
         panel.setVisible(visibility);
     }
 }

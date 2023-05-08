@@ -26,12 +26,15 @@ import static com.github.polyrocketmatt.reflow.ReFlow.CLASS_HANDLER;
 
 public class FlowInterface extends JFrame {
 
-    private final FlowInterfaceManager manager;
-    private final FlowActions actions;
-    private final Set<FlowComponent> panels = new HashSet<>();
+    private FlowInterfaceManager manager;
+    private FlowActions actions;
+    private final Set<FlowComponent> indexedPanels = new HashSet<>();
+    private final Set<FlowComponent> unindexedPanels = new HashSet<>();
     private final Logger logger = LoggerFactory.getLogger("FlowInterface");
 
-    public FlowInterface() {
+    public FlowInterface() {}
+
+    public void initialise() {
         //  Initializes the look & feel
         this.manager = new FlowInterfaceManager();
 
@@ -132,7 +135,7 @@ public class FlowInterface extends JFrame {
         actions.initializeClassTree();
 
         //  Unregister the old editor
-        if (get(FlowEditor.class) != null)
+        if (getFlowComponent(FlowEditor.class) != null)
             unregister(FlowEditor.class);
 
         //  Create the flow editor
@@ -156,36 +159,42 @@ public class FlowInterface extends JFrame {
 
     public void register(FlowComponent component) {
         if (component.getIndex() != -1)
-            panels.add(component);
+            indexedPanels.add(component);
+        else
+            unindexedPanels.add(component);
         add(component.getComponent());
     }
 
     private void unregister(Class<?> clazz) {
-        FlowComponent component = get(clazz);
+        logger.info("Unregistering component: " + clazz.getSimpleName());
 
-        component.setVisibile(false);
-        panels.removeIf(panel -> panel.getClass().equals(clazz));
+        FlowComponent component = getFlowComponent(clazz);
+
+        component.setVisible(false);
+        indexedPanels.removeIf(panel -> panel.getClass().equals(clazz));
     }
 
-    private FlowComponent get(Class<?> clazz) {
-        return panels.stream().filter(panel -> panel.getClass().equals(clazz)).findFirst().orElse(null);
+    public FlowComponent getFlowComponent(Class<?> clazz) {
+        return indexedPanels.stream().filter(panel -> panel.getClass().equals(clazz)).findFirst().orElse(
+                unindexedPanels.stream().filter(panel -> panel.getClass().equals(clazz)).findFirst().orElse(null)
+        );
     }
 
     public void setVisibility(int index) {
-        if (index < 0 || index >= panels.size())
+        if (index < 0 || index >= indexedPanels.size())
             throw new IllegalArgumentException("Index out of bounds");
-        panels.forEach(panel -> panel.getComponent().setVisible(panel.getIndex() == index));
+        indexedPanels.forEach(panel -> panel.getComponent().setVisible(panel.getIndex() == index));
     }
 
     public void setVisibility(FlowComponent flowComponent) {
         int index = flowComponent.getIndex();
-        if (index < 0 || index >= panels.size())
+        if (index < 0 || index >= indexedPanels.size())
             throw new IllegalArgumentException("Index out of bounds");
-        panels.forEach(panel -> panel.getComponent().setVisible(panel.getIndex() == index));
+        indexedPanels.forEach(panel -> panel.getComponent().setVisible(panel.getIndex() == index));
     }
 
     public int getNextIndex() {
-        return panels.size();
+        return indexedPanels.size();
     }
 
 }
