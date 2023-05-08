@@ -178,10 +178,12 @@ public class FlowClassExplorer extends FlowComponent {
         FlowSyntaxHighlightedTextView decompiledTextPane = new FlowSyntaxHighlightedTextView(wrapper, decompiledSource);
 
         //  Finally, we add the tab to the tabbed pane and set it as the selected tab
-        FlowTab decompiledTab = decompiledTabs.add(className);
+        FlowTab tab = decompiledTabs.add(className);
+        int index = decompiledTabs.getIndexOf(tab);
 
-        decompiledTab.getComponent().add(decompiledTextPane.getComponent(), BorderLayout.CENTER);
-        decompiledTabs.setSelectedTab(decompiledTab);
+        tab.getComponent().add(decompiledTextPane.getComponent(), BorderLayout.CENTER);
+        decompiledTabs.setSelectedTab(index);
+        decompiledTabs.updateColors();
     }
 
     public static class SortedTreeModel extends DefaultTreeModel {

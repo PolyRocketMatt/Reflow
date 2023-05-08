@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 
 import static com.github.polyrocketmatt.reflow.ReFlow.INTERFACE;
 import static com.github.polyrocketmatt.reflow.ReFlow.PALETTE;
@@ -18,17 +19,15 @@ public class FlowTab extends FlowComponent {
         this.tabName = tabName;
         this.panel = panel;
         this.tabComponent = tabComponent;
-        this.panel.addMouseListener(new MouseAdapter() {
+        this.tabComponent.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent event) {
-                //  Set the background of the component to selected
-                tabComponent.setBackground(PALETTE.getMenuSelectBackground());
+                setBackground(PALETTE.getMenuHover());
             }
 
             @Override
             public void mouseExited(MouseEvent event) {
-                //  Set the background of the component to unselected
-                tabComponent.setBackground(PALETTE.getUnselect());
+                setBackground(PALETTE.getUnselect());
             }
         });
 
@@ -51,6 +50,11 @@ public class FlowTab extends FlowComponent {
 
     public Component getTabComponent() {
         return tabComponent;
+    }
+
+    public void setBackground(Color color) {
+        panel.setBackground(color);
+        tabComponent.setBackground(color);
     }
 
 }

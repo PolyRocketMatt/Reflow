@@ -115,21 +115,6 @@ public class FlowStylePane extends FlowComponent {
                                 break;
                             }
                         }
-
-
-                        /*
-                        //  We find the class-wrapper of the (possible outer) class
-                        boolean isInner = primitiveClassName.contains("$");
-
-                        String className = isInner ? primitiveClassName.substring(0, primitiveClassName.indexOf('$')) : primitiveClassName;
-                        ClassWrapper wrapper = CLASS_HANDLER.get(className);
-                        String classPath = wrapper.getClassName();
-                        FlowClassExplorer explorer = (FlowClassExplorer) INTERFACE.getFlowComponent(FlowClassExplorer.class);
-
-                        if (explorer != null)
-                            explorer.decompileClass(wrapper, classPath, className);
-
-                         */
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }
