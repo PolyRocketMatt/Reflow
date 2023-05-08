@@ -23,13 +23,13 @@ public class FlowStylePane implements FlowComponent {
     private final StyledDocument document;
     private final Set<String> types;
     private final Set<String> internalTypes;
-    private Style keywordStyle;
-    private Style literalStyle;
-    private Style internalTypeStyle;
-    private Style externalTypeStyle;
-    private Style stringLiteralStyle;
-    private Style internalAnnotationStyle;
-    private Style externalAnnotationStyle;
+    private final Style keywordStyle;
+    private final Style literalStyle;
+    private final Style internalTypeStyle;
+    private final Style externalTypeStyle;
+    private final Style stringLiteralStyle;
+    private final Style internalAnnotationStyle;
+    private final Style externalAnnotationStyle;
 
     // Create a custom hand cursor
     private final Cursor cursor;
@@ -77,7 +77,7 @@ public class FlowStylePane implements FlowComponent {
                                 .findFirst()
                                 .orElse(null);
 
-                        
+
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }
