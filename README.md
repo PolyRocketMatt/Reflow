@@ -14,3 +14,11 @@ reasons and is an open-source project (GPL v3 License). Currently, Restruct supp
 features:
 
 -   [x] A (primitive) decompiler with basic syntax highlighting.
+
+--- 
+
+<p align="center">
+Logo provided by <a href="https://www.flaticon.com/free-icons/amino-acids">Flaticon</a>
+</p>
+
+---
