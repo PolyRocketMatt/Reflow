@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<AnchorPane fx:id="rootPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.polyrocketmatt.restruct.RestructInitController">
+   <children>
+      <MenuBar prefHeight="25.0" styleClass="transparent" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" text="New">
+                     <graphic>
+                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-add" iconSize="12" />
+                     </graphic>
+                  </MenuItem>
+                  <MenuItem mnemonicParsing="false" text="Open">
+                     <graphic>
+                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-folder_open" iconSize="12" />
+                     </graphic>
+                  </MenuItem>
+                  <MenuItem mnemonicParsing="false" text="Save">
+                     <graphic>
+                        <FontIcon iconColor="#1b1725" iconLiteral="mdmz-save" iconSize="12" />
+                     </graphic>
+                  </MenuItem>
+                  <MenuItem mnemonicParsing="false" text="Export">
+                     <graphic>
+                        <FontIcon iconColor="#1b1725" iconLiteral="mdmz-upgrade" iconSize="12" />
+                     </graphic>
+                  </MenuItem>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Close">
+                     <graphic>
+                        <FontIcon iconColor="#1b1725" iconLiteral="mdsal-close" iconSize="12" />
+                     </graphic>
+                  </MenuItem>
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About">
+                     <graphic>
+                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-info" iconSize="12" />
+                     </graphic></MenuItem>
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <BorderPane fx:id="initBorderPane" layoutY="25.0" onDragDropped="#onDragDropped" onDragOver="#onDragOver" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0">
+         <center>
+            <Label fx:id="initLabel" onDragDropped="#onDragDropped" onDragOver="#onDragOver" styleClass="transparent" text="Open a file or drag and drop a .jar file" textAlignment="CENTER" BorderPane.alignment="CENTER">
+               <font>
+                  <Font name="Segoe UI Light" size="16.0" />
+               </font>
+            </Label>
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>

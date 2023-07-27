@@ -1,7 +1,38 @@
-.transparent-background {
+.transparent {
     -fx-background-color: transparent;
 }
 
-.menu-bar-background {
-    -fx-background-color: #f4f4f4;
+.raisin-black {
+    -fx-background-color: #1B1725;
+}
+
+.raisin-black-text {
+    -fx-text-fill: #1B1725;
+}
+
+.french-gray {
+    -fx-background-color: #B3B7BF;
+}
+
+.french-gray-text {
+    -fx-text-fill: #B3B7BF;
+}
+
+.button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1B1725;
+    -fx-border-radius: 0;
+}
+
+.button:hover {
+    -fx-background-color: #B3B7BF;
+    -fx-text-fill: #1B1725;
+    -fx-opacity: 0.75;
+    -fx-border-radius: 0;
+}
+
+.menu-item:focused {
+    -fx-background-color: #B3B7BF;
+    -fx-text-fill: #1B1725;
+    -fx-opacity: 0.75;
 }
