@@ -1,0 +1,7 @@
+.transparent-background {
+    -fx-background-color: transparent;
+}
+
+.menu-bar-background {
+    -fx-background-color: #f4f4f4;
+}
