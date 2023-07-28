@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.polyrocketmatt</groupId>
-    <artifactId>Restruct</artifactId>
+    <artifactId>Reflow</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Restruct</name>
+    <name>Reflow</name>
     <modules>
-        <module>restruct-ui</module>
-        <module>restruct-decompiler</module>
+        <module>reflow-ui</module>
+        <module>reflow-decompiler</module>
     </modules>
 
     <properties>
@@ -80,7 +80,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                com.github.polyrocketmatt.restruct/com.github.polyrocketmatt.restruct.RestructUI
+                                com.github.polyrocketmatt.restruct/com.github.polyrocketmatt.reflow.ReflowUI
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

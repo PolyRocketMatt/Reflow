@@ -1,4 +1,4 @@
-package com.github.polyrocketmatt.restruct;
+package com.github.polyrocketmatt.reflow;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -8,19 +8,19 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class RestructUI extends Application {
+public class ReflowUI extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
         //  Load FXML
-        FXMLLoader loader = new FXMLLoader(RestructUI.class.getResource("restruct-init.fxml"));
+        FXMLLoader loader = new FXMLLoader(ReflowUI.class.getResource("reflow-init.fxml"));
         Scene scene = new Scene(loader.load(), 800, 600);
 
         //  Setting style
         scene.getStylesheets().add("stylesheet.css");
 
-        stage.setTitle(" Restruct");
-        stage.getIcons().add(new Image("/restruct-32.png", 32, 32, true, false));
+        stage.setTitle(" Reflow");
+        stage.getIcons().add(new Image("/reflow-32.png", 32, 32, true, false));
         stage.setScene(scene);
         stage.show();
     }

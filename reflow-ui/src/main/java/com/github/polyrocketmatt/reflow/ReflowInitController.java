@@ -1,5 +1,6 @@
-package com.github.polyrocketmatt.restruct;
+package com.github.polyrocketmatt.reflow;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Label;
@@ -8,25 +9,23 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 
 import java.io.File;
-import java.util.Timer;
 
-public class RestructInitController implements Controller {
+public class ReflowInitController implements Controller {
 
     @FXML Label initLabel;
     @FXML BorderPane initBorderPane;
     @FXML AnchorPane rootPane;
     @FXML AnchorPane filePane;
 
-    public RestructInitController() {}
+    public ReflowInitController() {}
 
     @SuppressWarnings("ConstantConditions")
     public void contextSwitch(String context) {
         //  Try to load decompiler view
         try {
-            AnchorPane switchedContextPane = FXMLLoader.load(RestructUI.class.getResource(context));
+            AnchorPane switchedContextPane = FXMLLoader.load(ReflowUI.class.getResource(context));
             rootPane.getChildren().setAll(switchedContextPane);
         } catch (Exception ex) {
             //  Close the application
@@ -34,12 +33,11 @@ public class RestructInitController implements Controller {
         }
     }
 
-    @FXML void fileMenuClickHandler(MouseEvent event) {
-        filePane.setVisible(true);
-    }
+    @FXML
+    public void onClose(ActionEvent event) {
+        //  TODO: Delete TMP files
 
-    @FXML void borderPaneClickHandler(MouseEvent event) {
-        initBorderPane.setVisible(false);
+        System.exit(0);
     }
 
     @FXML

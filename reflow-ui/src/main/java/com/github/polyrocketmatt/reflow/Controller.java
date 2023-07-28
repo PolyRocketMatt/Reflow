@@ -1,4 +1,4 @@
-package com.github.polyrocketmatt.restruct;
+package com.github.polyrocketmatt.reflow;
 
 @FunctionalInterface
 public interface Controller {

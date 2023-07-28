@@ -5,6 +5,6 @@ module com.github.polyrocketmatt.restruct {
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
 
-    opens com.github.polyrocketmatt.restruct to javafx.fxml;
-    exports com.github.polyrocketmatt.restruct;
+    opens com.github.polyrocketmatt.reflow to javafx.fxml;
+    exports com.github.polyrocketmatt.reflow;
 }
