@@ -42,6 +42,8 @@ build/
 .idea/**
 .mvn/
 .mvn/**
+.mvn/wrapper/
+.mvn/wrapper/**
 mvnw
 mvnw.cmd
 img/pdn/
