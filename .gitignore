@@ -44,3 +44,5 @@ build/
 .mvn/**
 mvnw
 mvnw.cmd
+img/pdn/
+img/pdn/**

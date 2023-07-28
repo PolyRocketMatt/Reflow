@@ -10,7 +10,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<AnchorPane fx:id="rootPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.polyrocketmatt.reflow.ReflowInitController">
+<AnchorPane fx:id="rootPane" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.github.polyrocketmatt.reflow.InitController">
    <children>
       <MenuBar prefHeight="25.0" styleClass="transparent" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <menus>
@@ -18,10 +18,10 @@
             <items>
               <MenuItem mnemonicParsing="false" text="New">
                      <graphic>
-                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-add" iconSize="12" />
+                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-add" iconSize="12" styleClass="font-icon" />
                      </graphic>
                   </MenuItem>
-                  <MenuItem mnemonicParsing="false" text="Open">
+                  <MenuItem mnemonicParsing="false" onAction="#onOpenFile" text="Open">
                      <graphic>
                         <FontIcon iconColor="#1b1725" iconLiteral="mdal-folder_open" iconSize="12" />
                      </graphic>
