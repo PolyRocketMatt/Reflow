@@ -1,11 +1,11 @@
 package com.github.polyrocketmatt.reflow.context;
 
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class ApplicationContext {
 
@@ -14,21 +14,21 @@ public class ApplicationContext {
     public static final String SYSTEM_SEPARATOR = System.getProperty("file.separator");
     public static final ApplicationContext CONTEXT = new ApplicationContext();
 
-    private final List<File> fileStore;
+    private final Queue<File> queue;
     private Stage stage = null;
     private double widthPenalty = 0.0;
     private double heightPenalty = 0.0;
 
     private ApplicationContext() {
-        this.fileStore = new ArrayList<>();
+        this.queue = new LinkedList<>();
     }
 
     public void addFile(File file) {
-        fileStore.add(file);
+        queue.add(file);
     }
 
-    public List<File> getFileStore() {
-        return fileStore;
+    public Queue<File> getQueue() {
+        return queue;
     }
 
     public Stage getStage() {

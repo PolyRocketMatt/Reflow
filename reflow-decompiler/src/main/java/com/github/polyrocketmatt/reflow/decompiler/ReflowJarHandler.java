@@ -14,13 +14,10 @@ import java.util.zip.ZipInputStream;
 
 public class ReflowJarHandler {
 
-    private final File file;
-
     private final Map<String, byte[]> resources;
     private final Map<String, ClassWrapper> classWrappers;
 
-    private ReflowJarHandler(File file) {
-        this.file = file;
+    public ReflowJarHandler() {
         this.resources = new HashMap<>();
         this.classWrappers = new HashMap<>();
     }
@@ -33,10 +30,7 @@ public class ReflowJarHandler {
         return classWrappers;
     }
 
-    public EntityWrapper parseClass(ZipInputStream zipInputStream, ZipEntry entry) throws IOException {
-        String name = entry.getName();
-        byte[] data = ByteUtils.readBytes(zipInputStream, entry);
-
+    public EntityWrapper parseClass(String name, byte[] data) throws IOException {
         if (name.endsWith(".class")) {
             ClassNode classNode = ByteUtils.parseBytesToClassNode(data);
             ClassWrapper classWrapper = new ClassWrapper(classNode);
@@ -79,10 +73,6 @@ public class ReflowJarHandler {
 
             return null;
         }
-    }
-
-    public static ReflowJarHandler of(File file) {
-        return new ReflowJarHandler(file);
     }
 
 }

@@ -23,7 +23,7 @@ public class ReflowUI extends Application {
         stage.setTitle(" Reflow");
         stage.getIcons().add(new Image("/reflow-32.png", 32, 32, true, false));
         stage.setScene(scene);
-        stage.setMaximized(true);
+        stage.setMaximized(false);
         stage.show();
 
         //  Set scene in ApplicationContext

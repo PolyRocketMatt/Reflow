@@ -19,6 +19,7 @@ public class ClassWrapper implements EntityWrapper {
         return EntityType.CLASS;
     }
 
+    @Override
     public String getName() {
         return this.asmClassNode.name;
     }

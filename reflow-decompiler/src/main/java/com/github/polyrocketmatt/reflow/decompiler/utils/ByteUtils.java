@@ -8,12 +8,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ByteUtils {
 
-    public static byte[] readBytes(ZipInputStream zis, ZipEntry entry) throws IOException {
+    public static byte[] readBytes(ZipInputStream zis) throws IOException {
         //  Buffer to read bytes into
         byte[] buffer = new byte[1024];
 

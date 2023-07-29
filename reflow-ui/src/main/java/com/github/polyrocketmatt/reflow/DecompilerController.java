@@ -2,14 +2,13 @@ package com.github.polyrocketmatt.reflow;
 
 import com.github.polyrocketmatt.reflow.context.ApplicationContext;
 import com.github.polyrocketmatt.reflow.decompiler.ReflowJarHandler;
+import com.github.polyrocketmatt.reflow.decompiler.struct.EntityStructure;
+import com.github.polyrocketmatt.reflow.decompiler.utils.ByteUtils;
 import com.github.polyrocketmatt.reflow.decompiler.wrapper.ClassWrapper;
 import com.github.polyrocketmatt.reflow.decompiler.wrapper.EntityWrapper;
-import com.github.polyrocketmatt.reflow.palette.ReflowColor;
-import com.github.polyrocketmatt.reflow.palette.ReflowPalette;
-import com.github.polyrocketmatt.reflow.processing.BufferedImageTranscoder;
 import com.github.polyrocketmatt.reflow.processing.SVGIconFactory;
-import com.github.polyrocketmatt.reflow.processing.Scalr;
-import javafx.embed.swing.SwingFXUtils;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,134 +17,163 @@ import javafx.scene.Scene;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.nio.Buffer;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class DecompilerController implements Controller, Initializable {
 
-    private final File file;
-    private final ReflowJarHandler jarHandler;
-
-    private final int totalClassCount;
+    private File file;
+    private ReflowJarHandler jarHandler;
+    private EntityStructure<ClassWrapper> classWrapperStructure;
 
     @FXML AnchorPane rootPane;
     @FXML ProgressBar mainProgressBar;
     @FXML TreeView<String> classTreeView;
 
-    public DecompilerController() {
-        this.file = ApplicationContext.CONTEXT.getFileStore().get(0);
-        this.jarHandler = ReflowJarHandler.of(file);
-
-        System.out.println("File: " + file.getAbsolutePath());
-
-        //  Count the number of classes in the JAR
-        int classCount = 0;
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null)
-                if (entry.getName().endsWith(".class"))
-                    classCount++;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        System.out.println("Class count: " + classCount);
-        this.totalClassCount = classCount;
-    }
+    public DecompilerController() {}
 
     @SuppressWarnings("ConstantConditions")
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        ImageView rootIcon = SVGIconFactory.fromSVG("svg/jar-item-plain.svg");
-        TreeItem<String> rootItem = new TreeItem<>(this.file.getName(), rootIcon);
-
-        loadJarFile(rootItem);
-        loadClassTree(rootItem);
+        setupClassTreeView();
     }
 
-    private void loadJarFile(TreeItem<String> rootItem) {
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.schedule(() -> {
-            double progress = 0;
-            try (ZipInputStream zis = new ZipInputStream(new FileInputStream(file))) {
-                ZipEntry entry;
-                while ((entry = zis.getNextEntry()) != null) {
-                    EntityWrapper wrapper = jarHandler.parseClass(zis, entry);
-                    if (wrapper instanceof ClassWrapper classWrapper) {
-                        insertIntoTree(rootItem, classWrapper);
+    private void setupClassTreeView() {
+        this.file = ApplicationContext.CONTEXT.getQueue().poll();
+        if (this.file == null)
+            throw new RuntimeException("No file was found in the queue when initializing the decompiler controller");
+        this.jarHandler = new ReflowJarHandler();
+        this.classTreeView.setVisible(false);
+        this.loadJarFile();
+        this.classTreeView.setVisible(true);
+    }
 
-                        try {
-                            double t = progress++ / totalClassCount;
-                            mainProgressBar.setProgress(t);
-                            ReflowColor color = ReflowColor.lerp(ReflowPalette.BLUE_ACCENT, ReflowPalette.GREEN_ACCENT, t);
-                            mainProgressBar.setStyle("-fx-accent: #" + color.hex());
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                        }
-                    }
+    private List<ClassWrapper> handleInputStream(TreeItem<String> root, ZipInputStream zis) throws Exception{
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+        List<ClassWrapper> wrappers = new ArrayList<>();
+        ZipEntry entry;
+
+        while ((entry = zis.getNextEntry()) != null) {
+            String name = entry.getName();
+            byte[] data = ByteUtils.readBytes(zis);
+
+            executor.execute(() -> {
+                try {
+                    EntityWrapper wrapper = this.jarHandler.parseClass(name, data);
+
+                    if (wrapper instanceof ClassWrapper classWrapper)
+                        wrappers.add(classWrapper);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
+            });
+        }
+        executor.shutdown();
 
-            mainProgressBar.setProgress(0.0);
-        }, 100, TimeUnit.MILLISECONDS);
-
-        scheduler.shutdown();
+        if (!executor.awaitTermination(5, TimeUnit.MINUTES))
+            throw new IllegalStateException("Failed to load JAR file");
+        return wrappers;
     }
 
-    private void loadClassTree(TreeItem<String> rootItem) {
-        classTreeView.setRoot(rootItem);
-    }
+    private void constructTree(TreeItem<String> rootItem) {
+        Task<Void> insertion = new Task<>() {
+            @Override
+            protected Void call() {
+                List<String> parents = classWrapperStructure.getAbsoluteParents();
 
-    private void insertIntoTree(TreeItem<String> root, ClassWrapper wrapper) {
-        String[] paths = wrapper.getName().split("/");
-        TreeItem<String> current = root;
+                //  Get the parents who have more than one child and exactly one child
+                ArrayList<String> packageParents = new ArrayList<>(parents.stream().filter(parent -> classWrapperStructure.isPackage(parent)).toList());
+                ArrayList<String> classParents = new ArrayList<>(parents.stream().filter(parent -> classWrapperStructure.isClass(parent)).toList());
 
-        for (int i = 0; i < paths.length; i++) {
-            boolean isLast = i == paths.length - 1;
+                //  Sort both
+                packageParents.sort(Comparator.comparingInt(o -> classWrapperStructure.getChildren(o).size()));
+                classParents.sort(Comparator.comparingInt(o -> classWrapperStructure.getChildren(o).size()));
 
-            // See if the current node has a child with the same name
-            String subPath = paths[i];
-            TreeItem<String> child = current.getChildren().stream()
-                    .filter(treeItem -> treeItem.getValue().equals(subPath))
-                    .findFirst()
-                    .orElse(null);
+                //  Add package parents first, then class parents
+                for (String parent : packageParents)
+                    insertElement(parent.substring(0, parent.length() - 1), parent, rootItem, true);
+                for (String parent : classParents)
+                    insertElement(parent.substring(0, parent.length() - 1), parent, rootItem, false);
 
-            // If a child was found, we can continue down the tree
-            if (child != null) {
-                current = child;
-                continue;
+                return null;
             }
 
-            // If no child was found, we need to create a new node
-            ImageView classIcon = SVGIconFactory.fromSVG("svg/class-item.svg");
-            TreeItem<String> newNode = (isLast) ? new TreeItem<>(subPath, classIcon) : new TreeItem<>(subPath);
+            private void insertElement(String element, String path, TreeItem<String> parent, boolean expandable) {
+                boolean isPackage = classWrapperStructure.isPackage(path);
+                ImageView itemIcon = SVGIconFactory.fromSVG((isPackage) ? "svg/package-item-plain.svg" : "svg/class-item-plain.svg");
+                TreeItem<String> item = new TreeItem<>(element, itemIcon);
+                Platform.runLater(() -> parent.getChildren().add(item));
 
-            // Add the new node to the current node
-            current.getChildren().add(newNode);
+                item.addEventHandler(TreeItem.branchExpandedEvent(), event -> {
+                    //  First check if the item was already loaded by checking if the only item is the expansion item
+                    if (item.getChildren().size() == 1 && item.getChildren().get(0).getValue().equals("Loading...")) {
 
-            // Set the new node as the current node
-            current = newNode;
+                        //  Remove all children
+                        item.getChildren().clear();
+
+                        //  Get actual children
+                        List<String> children = classWrapperStructure.getChildren(path);
+                        List<String> packageChildren = new ArrayList<>(children.stream().filter(child -> classWrapperStructure.isPackage(path + child + "/")).toList());
+                        List<String> classChildren = new ArrayList<>(children.stream().filter(child -> !classWrapperStructure.isPackage(path + child + "/")).toList());
+
+                        //  Sort packages and classes alphabetically
+                        packageChildren.sort(String::compareToIgnoreCase);
+                        classChildren.sort(String::compareToIgnoreCase);
+
+                        //  Add package parents first, then class parents
+                        for (String subParent : packageChildren)
+                            insertElement(subParent, path + subParent + "/", item, true);
+                        for (String subChild : classChildren)
+                            //  TODO: In the future, this can be true if we want to add methods/constructors/inner class views
+                            insertElement(subChild, path + subChild + "/", item, false);
+                    }
+                });
+
+                //  TODO: Work staged (i.e. when expanding, make sure the expanded level is already loaded)
+                //  If the item is not expandable, we do not want to make it expandable currently
+                if (expandable) {
+                    //  Expansion item
+                    TreeItem<String> expansionItem = new TreeItem<>("Loading...");
+
+                    //  Add expansion item to item
+                    Platform.runLater(() -> item.getChildren().add(expansionItem));
+                }
+            }
+        };
+
+        Thread insertionThread = new Thread(insertion);
+        insertionThread.setDaemon(true);
+        insertionThread.start();
+    }
+
+    private void loadJarFile() {
+        try {
+            ImageView rootIcon = SVGIconFactory.fromSVG("svg/jar-item-plain.svg");
+            TreeItem<String> rootItem = new TreeItem<>(this.file.getName(), rootIcon);
+            ZipInputStream zis = new ZipInputStream(new FileInputStream(this.file));
+            List<ClassWrapper> classWrappers = handleInputStream(rootItem, zis);
+
+            this.classWrapperStructure = new EntityStructure<>(classWrappers);
+            this.classTreeView.setRoot(rootItem);
+            this.constructTree(rootItem);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -188,9 +216,17 @@ public class DecompilerController implements Controller, Initializable {
                 new FileChooser.ExtensionFilter("Jar Files", "*.jar"),
                 new FileChooser.ExtensionFilter("Zip Files", "*.zip")
         );
+
+        //  Update context
         File selectedFile = fileChooser.showOpenDialog(ApplicationContext.CONTEXT.getStage());
         ApplicationContext.CONTEXT.addFile(selectedFile);
-        contextSwitch(ApplicationContext.DECOMPILER);
+
+        //  We do not want to switch context here, as we are already in the decompiler context
+        try {
+            setupClassTreeView();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
 }

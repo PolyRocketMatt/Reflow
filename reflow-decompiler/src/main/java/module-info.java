@@ -7,6 +7,7 @@ module com.gitub.polyrocketmatt.reflow.decompiler {
 
     exports com.github.polyrocketmatt.reflow.decompiler.decompilers;
     exports com.github.polyrocketmatt.reflow.decompiler.entity;
+    exports com.github.polyrocketmatt.reflow.decompiler.struct;
     exports com.github.polyrocketmatt.reflow.decompiler.utils;
     exports com.github.polyrocketmatt.reflow.decompiler.wrapper;
     exports com.github.polyrocketmatt.reflow.decompiler;

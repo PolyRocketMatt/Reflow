@@ -140,7 +140,7 @@
                </Menu>
            </menus>
        </MenuBar>
-      <ProgressBar fx:id="mainProgressBar" prefHeight="15.0" prefWidth="200.0" progress="0.0" styleClass="white" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="25.0" />
+      <ProgressBar fx:id="mainProgressBar" prefHeight="15.0" prefWidth="200.0" progress="0.0" styleClass="white" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="150.0" AnchorPane.topAnchor="25.0" />
       <AnchorPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
          <children>
             <SplitPane dividerPositions="0.5003017501508751" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">

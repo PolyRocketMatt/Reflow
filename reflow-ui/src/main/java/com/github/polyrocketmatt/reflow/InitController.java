@@ -80,9 +80,11 @@ public class InitController implements Controller {
                 new FileChooser.ExtensionFilter("Zip Files", "*.zip")
         );
         File selectedFile = fileChooser.showOpenDialog(ApplicationContext.CONTEXT.getStage());
-        ApplicationContext.CONTEXT.addFile(selectedFile);
+        if (selectedFile != null) {
+            ApplicationContext.CONTEXT.addFile(selectedFile);
 
-        contextSwitch(ApplicationContext.DECOMPILER);
+            contextSwitch(ApplicationContext.DECOMPILER);
+        }
     }
 
 }

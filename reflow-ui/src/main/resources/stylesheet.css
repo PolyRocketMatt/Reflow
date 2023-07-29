@@ -48,6 +48,14 @@
     -fx-opacity: 0.75;
 }
 
+.menu {
+    -fx-font: 14px "Segoe UI Light";
+}
+
+.menu-item {
+    -fx-font: 14px "Segoe UI Light";
+}
+
 .progress-bar .track {
     -fx-background-color: transparent;
     -fx-background-radius: 0;
