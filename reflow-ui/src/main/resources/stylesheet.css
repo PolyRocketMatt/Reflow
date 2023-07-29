@@ -25,35 +25,45 @@
 }
 
 .button:hover {
-    -fx-background-color: #FDFCFC;
+    -fx-background-color: #BABABA;
     -fx-text-fill: #363636;
     -fx-opacity: 0.75;
     -fx-border-radius: 0;
-}
-
-.menu-item:focused {
-    -fx-background-color: #363636;
-    -fx-text-fill: #FDFCFC;
-    -fx-opacity: 0.75;
-}
-
-.menu:hover {
-    -fx-background-color: #363636;
-    -fx-text-fill: #FDFCFC;
-    -fx-opacity: 0.75;
-}
-
-.menu:showing {
-    -fx-background-color: #363636;
-    -fx-opacity: 0.75;
 }
 
 .menu {
     -fx-font: 14px "Segoe UI Light";
 }
 
+.menu:hover {
+    -fx-background-color: #BABABA;
+    -fx-text-fill: #363636;
+    -fx-opacity: 0.75;
+}
+
+.menu:showing {
+    -fx-background-color: #BABABA;
+    -fx-opacity: 0.75;
+}
+
 .menu-item {
     -fx-font: 14px "Segoe UI Light";
+}
+
+.menu-item:focused {
+    -fx-background-color: #BABABA;
+    -fx-text-fill: #363636;
+    -fx-opacity: 0.75;
+}
+
+.menu-item:hover {
+    -fx-background-color: #BABABA;
+    -fx-text-fill: #363636;
+    -fx-opacity: 0.75;
+}
+
+.menu-item .label {
+    -fx-text-fill: #363636;
 }
 
 .progress-bar .track {
@@ -83,6 +93,26 @@
     -fx-border-width: 0;
 }
 
-.tree-view {
-    -fx-background: #FDFCFC;
+
+.tree-view .tree-cell {
+    -fx-background-color: #FDFCFC;
+    -fx-text-fill: #363636;
 }
+
+.tree-view .tree-cell:filled:selected {
+    -fx-background-color: #BABABA;
+    -fx-opacity: 0.9;
+}
+
+.tree-view .tree-cell:filled:selected {
+    -fx-text-fill: #363636;
+}
+
+.tree-cell .arrow {
+    -fx-background-color: #363636;
+}
+
+.tree-cell .disclosure-node {
+    -fx-background-color: #363636;
+}
+

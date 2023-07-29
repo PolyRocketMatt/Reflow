@@ -18,6 +18,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -62,6 +63,7 @@ public class DecompilerController implements Controller, Initializable {
         this.classTreeView.setVisible(false);
         this.loadJarFile();
         this.classTreeView.setVisible(true);
+        this.classTreeView.setOnMouseClicked(this::decompile);
     }
 
     private List<ClassWrapper> handleInputStream(TreeItem<String> root, ZipInputStream zis) throws Exception{
@@ -113,53 +115,68 @@ public class DecompilerController implements Controller, Initializable {
 
                 return null;
             }
-
-            private void insertElement(String element, String path, TreeItem<String> parent, boolean expandable) {
-                boolean isPackage = classWrapperStructure.isPackage(path);
-                ImageView itemIcon = SVGIconFactory.fromSVG((isPackage) ? "svg/package-item-plain.svg" : "svg/class-item-plain.svg");
-                TreeItem<String> item = new TreeItem<>(element, itemIcon);
-                Platform.runLater(() -> parent.getChildren().add(item));
-
-                item.addEventHandler(TreeItem.branchExpandedEvent(), event -> {
-                    //  First check if the item was already loaded by checking if the only item is the expansion item
-                    if (item.getChildren().size() == 1 && item.getChildren().get(0).getValue().equals("Loading...")) {
-
-                        //  Remove all children
-                        item.getChildren().clear();
-
-                        //  Get actual children
-                        List<String> children = classWrapperStructure.getChildren(path);
-                        List<String> packageChildren = new ArrayList<>(children.stream().filter(child -> classWrapperStructure.isPackage(path + child + "/")).toList());
-                        List<String> classChildren = new ArrayList<>(children.stream().filter(child -> !classWrapperStructure.isPackage(path + child + "/")).toList());
-
-                        //  Sort packages and classes alphabetically
-                        packageChildren.sort(String::compareToIgnoreCase);
-                        classChildren.sort(String::compareToIgnoreCase);
-
-                        //  Add package parents first, then class parents
-                        for (String subParent : packageChildren)
-                            insertElement(subParent, path + subParent + "/", item, true);
-                        for (String subChild : classChildren)
-                            //  TODO: In the future, this can be true if we want to add methods/constructors/inner class views
-                            insertElement(subChild, path + subChild + "/", item, false);
-                    }
-                });
-
-                //  TODO: Work staged (i.e. when expanding, make sure the expanded level is already loaded)
-                //  If the item is not expandable, we do not want to make it expandable currently
-                if (expandable) {
-                    //  Expansion item
-                    TreeItem<String> expansionItem = new TreeItem<>("Loading...");
-
-                    //  Add expansion item to item
-                    Platform.runLater(() -> item.getChildren().add(expansionItem));
-                }
-            }
         };
 
         Thread insertionThread = new Thread(insertion);
         insertionThread.setDaemon(true);
         insertionThread.start();
+    }
+
+    private void insertElement(String element, String path, TreeItem<String> parent, boolean expandable) {
+        boolean isPackage = classWrapperStructure.isPackage(path);
+        ImageView itemIcon = SVGIconFactory.fromSVG((isPackage) ? "svg/package-item-plain.svg" : "svg/class-item-plain.svg");
+        TreeItem<String> item = new TreeItem<>(element, itemIcon);
+        Platform.runLater(() -> parent.getChildren().add(item));
+
+        item.addEventHandler(TreeItem.branchExpandedEvent(), event -> expand(item, path));
+
+        //  TODO: Work staged (i.e. when expanding, make sure the expanded level is already loaded)
+        //  If the item is not expandable, we do not want to make it expandable currently
+        if (expandable) {
+            //  Expansion item
+            TreeItem<String> expansionItem = new TreeItem<>("Loading...");
+
+            //  Add expansion item to item
+            Platform.runLater(() -> item.getChildren().add(expansionItem));
+        }
+    }
+
+    private void expand(TreeItem<String> item, String path) {
+        //  First check if the item was already loaded by checking if the only item is the expansion item
+        if (item.getChildren().size() == 1 && item.getChildren().get(0).getValue().equals("Loading...")) {
+            System.out.println("FFS");
+
+            //  Remove the expansion item
+            item.getChildren().remove(0);
+
+            //  Get actual children
+            List<String> children = classWrapperStructure.getChildren(path);
+            List<String> packageChildren = new ArrayList<>(children.stream().filter(child -> classWrapperStructure.isPackage(path + child + "/")).toList());
+            List<String> classChildren = new ArrayList<>(children.stream().filter(child -> !classWrapperStructure.isPackage(path + child + "/")).toList());
+
+            //  Sort packages and classes alphabetically
+            packageChildren.sort(String::compareToIgnoreCase);
+            classChildren.sort(String::compareToIgnoreCase);
+
+            //  Add package parents first, then class parents
+            for (String subParent : packageChildren)
+                insertElement(subParent, path + subParent + "/", item, true);
+            for (String subChild : classChildren)
+                //  TODO: In the future, this can be true if we want to add methods/constructors/inner class views
+                insertElement(subChild, path + subChild + "/", item, false);
+        }
+    }
+
+    private void expand(TreeItem<String> item) {
+        StringBuilder path = new StringBuilder(item.getValue() + "/");
+        TreeItem<String> parent = item.getParent();
+
+        while (parent.getParent() != null) {
+            path.insert(0, parent.getValue() + "/");
+            parent = parent.getParent();
+        }
+
+        expand(item, path.toString());
     }
 
     private void loadJarFile() {
@@ -226,6 +243,26 @@ public class DecompilerController implements Controller, Initializable {
             setupClassTreeView();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @FXML
+    public void decompile(MouseEvent event) {
+        try {
+            TreeView<String> treeView = (TreeView<String>) event.getSource();
+            TreeItem<String> selectedItem = treeView.getSelectionModel().getSelectedItem();
+            String value = selectedItem.getValue();
+
+            //  Check if the value is a class
+            if (this.classWrapperStructure.isClass(value)) {
+            } else {
+                //  Expansion
+                expand(selectedItem);
+            }
+        } catch (Exception ex) {
+            //  Ignore
+            System.out.println(event.getSource().getClass().getSimpleName());
         }
     }
 

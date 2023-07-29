@@ -16,8 +16,6 @@ features:
 
 ## Themes
 
-
-
 --- 
 
 <p align="center">

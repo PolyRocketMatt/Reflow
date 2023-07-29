@@ -18,28 +18,28 @@
             <items>
               <MenuItem mnemonicParsing="false" text="New">
                      <graphic>
-                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-add" iconSize="12" styleClass="font-icon" />
+                        <FontIcon iconColor="#363636" iconLiteral="mdal-add" iconSize="12" styleClass="font-icon" />
                      </graphic>
                   </MenuItem>
                   <MenuItem mnemonicParsing="false" onAction="#onOpenFile" text="Open">
                      <graphic>
-                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-folder_open" iconSize="12" />
+                        <FontIcon iconColor="#363636" iconLiteral="mdal-folder_open" iconSize="12" />
                      </graphic>
                   </MenuItem>
                   <MenuItem mnemonicParsing="false" text="Save">
                      <graphic>
-                        <FontIcon iconColor="#1b1725" iconLiteral="mdmz-save" iconSize="12" />
+                        <FontIcon iconColor="#363636" iconLiteral="mdmz-save" iconSize="12" />
                      </graphic>
                   </MenuItem>
                   <MenuItem mnemonicParsing="false" text="Export">
                      <graphic>
-                        <FontIcon iconColor="#1b1725" iconLiteral="mdmz-upgrade" iconSize="12" />
+                        <FontIcon iconColor="#363636" iconLiteral="mdmz-upgrade" iconSize="12" />
                      </graphic>
                   </MenuItem>
                   <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem mnemonicParsing="false" onAction="#onClose" text="Close">
                      <graphic>
-                        <FontIcon iconColor="#1b1725" iconLiteral="mdsal-close" iconSize="12" />
+                        <FontIcon iconColor="#363636" iconLiteral="mdsal-close" iconSize="12" />
                      </graphic>
                   </MenuItem>
             </items>
@@ -48,7 +48,7 @@
             <items>
               <MenuItem mnemonicParsing="false" text="About">
                      <graphic>
-                        <FontIcon iconColor="#1b1725" iconLiteral="mdal-info" iconSize="12" />
+                        <FontIcon iconColor="#363636" iconLiteral="mdal-info" iconSize="12" />
                      </graphic></MenuItem>
             </items>
           </Menu>
